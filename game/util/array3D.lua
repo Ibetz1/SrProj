@@ -1,3 +1,5 @@
+local floor, ceil = math.floor, math.ceil
+
 local array = {}
 array.__index = array
 
@@ -25,7 +27,7 @@ end
 
 -- gets value from array
 function array:get(x, y, z, index)
-    if x <= 0 or x > self.w or y <= 0 or y > self.h then return end
+    if x <= 0 or x > self.w or y <= 0 or y > self.h then return {} end
 
     if index then return self[x][y][z][index] end
     return self[x][y][z]
@@ -38,6 +40,12 @@ function array:add(data, x, y, z, index)
     self[x][y][z][index] = data
 
     return index
+end
+
+-- maps coordinate to grid
+function array:map(x, y, t)
+    local t = t or _Constants.Tilesize
+    return floor(x / t), floor(y / t)
 end
 
 -- removes value from array

@@ -4,7 +4,7 @@ local comp = _Util.Object:new({
     requires = {}
 })
 
-function comp:init(x, y, w, h)
+function comp:init(x, y, w, h, properties)
     self.moving = false
     self.remove = false
 
@@ -13,7 +13,17 @@ function comp:init(x, y, w, h)
     self.direction = _Util.Vector()
     self.accellaration = _Util.Vector()
 
+    self.gridPosition = _Util.Vector()
+
+    self.properties = {
+        mass = 1
+    }
+
     self.w, self.h = w or 0, h or 0
+end
+
+function comp:onadd()
+    self.gridPosition.x, self.gridPosition.y = self.parent.world.grid:map(self.position.x, self.position.y)
 end
 
 function comp:getNextPosition() 
@@ -43,9 +53,17 @@ function comp:update(dt)
         self.velocity.x < -0.0001 or self.velocity.x > 0.0001 or
         self.velocity.y < -0.0001 or self.velocity.y > 0.0001
     )
+
+    self.gridPosition.x, self.gridPosition.y = self.parent.world.grid:map(self.position.x, self.position.y)
 end
 
 function comp:draw()
+    love.graphics.line(
+        self.position.x + self.w / 2, self.position.y + self.h / 2,
+        self.position.x + self.w / 2+ self.velocity.x * 10,
+        self.position.y + self.h / 2+ self.velocity.y * 10
+    )
+
     love.graphics.rectangle("line", self.position.x, self.position.y, self.w, self.h)
 end
 

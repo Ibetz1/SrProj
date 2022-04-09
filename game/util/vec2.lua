@@ -27,11 +27,9 @@ local vec2 = {
         return a
     end,
 
-    -- equal funtionality
+    -- equalality funtionality
     __eq = function(a, b)
-        assert(type(a) == 'vector2' and type(b) == 'vector2', 'invalid object type')
-
-        a.x, a.y = b.x, b.y
+        return (a.x == b.x and a.y == b.y)
     end,
 
     -- addition functionality

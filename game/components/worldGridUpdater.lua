@@ -13,62 +13,60 @@ function comp:init()
 
     self.origin = _Util.Vector()
     self.w, self.h = -1, -1
-    self.ongrid = false
 end
 
+-- executes addition of component
 function comp:onadd()
     local body = self.parent.physicsBody
     local Tilesize = _Constants.Tilesize
-    local pos = body.position
 
     -- set positional data
     self.w, self.h = ceil(body.w / Tilesize) + 1, ceil(body.h / Tilesize) + 1
-    self.origin.x, self.origin.y = floor(pos.x / Tilesize), floor(pos.y / Tilesize)
+    local pos = self.parent.physicsBody.gridPosition
+    self.origin.x, self.origin.y = pos.x, pos.y
 
-    self:applyVerteces()
+    self:applyVerteces(false)
 end
 
+-- executes on removal of component
 function comp:onremove() 
     self.ongrid = true
     self:applyVerteces()
 end
 
+-- updates world grid
+function comp:updateGridCoords(x, y, z, remove)
+    local world = self.parent.world
+
+    if remove == false then world.grid:add(self.parent.id, x, y, z, self.parent.gridIndex) end
+    if remove == true then world.grid:remove(x, y, z, self.parent.gridIndex) end
+end
+
 -- calculates verteces and adds them to grid
-function comp:applyVerteces()
+function comp:applyVerteces(remove)
     local z = self.parent.layer
 
     -- x axis
-    for x = 1, self.w do
-        for y = 1, self.h do
-            local px, py = self.origin.x + x, self.origin.y + y
+    for x = 0, self.w - 1 do
+        for y = 0, self.h - 1 do
 
-            self:updateGridCoords(px, py, z)
+            self:updateGridCoords(self.origin.x + x, self.origin.y + y, z, remove)
         end
     end
-
-    self.ongrid = not self.ongrid
-end
-
--- updates world grid
-function comp:updateGridCoords(x, y, z)
-    local world = self.parent.world
-
-    if not self.ongrid then world.grid:add(self.parent.id, x, y, z, self.parent.gridIndex) end
-    if self.ongrid then world.grid:remove(x, y, z, self.parent.gridIndex) end
 end
 
 -- updates grid component
 function comp:update(dt)
-    -- if not self.parent.physicsBody.moving then return end
+    if not self.parent.physicsBody.moving then return end
 
-    self:applyVerteces()
+    self:applyVerteces(true)
 
-    local Tilesize = _Constants.Tilesize
-    local pos = self.parent.physicsBody.position
+    local ox, oy = self.origin.x, self.origin.y
 
-    self.origin.x, self.origin.y = floor(pos.x / Tilesize), floor(pos.y / Tilesize)
+    local pos = self.parent.physicsBody.gridPosition
+    self.origin.x, self.origin.y = pos.x, pos.y
 
-    self:applyVerteces()
+    self:applyVerteces(false)
 end
 
 function comp:draw()

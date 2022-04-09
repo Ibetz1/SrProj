@@ -6,7 +6,7 @@ local world = _Internal.World(10, 10, 1)
 local worldSceneIndex = stack:addScene(world)
 
 local e = _Internal.Entity()
-e:addComponent(_Components.PhysicsBody(72, 16, 32, 32))
+e:addComponent(_Components.PhysicsBody(72, 16, 16, 16))
 e:addComponent(_Components.WorldGridUpdater())
 e:addComponent(_Components.RigidBody())
 
@@ -14,7 +14,7 @@ e:addComponent(_Components.RigidBody())
 world:addEntity(e)
 
 local z = _Internal.Entity()
-z:addComponent(_Components.PhysicsBody(48, 48, 32, 32))
+z:addComponent(_Components.PhysicsBody(48, 48, 16, 16))
 z:addComponent(_Components.WorldGridUpdater())
 z:addComponent(_Components.RigidBody())
 
@@ -35,5 +35,9 @@ function love.update(dt)
 end
 
 function love.draw()
+    love.graphics.print(love.timer.getFPS())
+
+    love.graphics.scale(2, 2)
+
     stack:draw()
 end
