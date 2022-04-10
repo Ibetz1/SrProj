@@ -2,7 +2,7 @@ local world = _Util.Object:new()
 
 function world:init(w, h, d)
     self.w, self.h, self.d = w, h, d
-    self.grid = _Util.Array3D(w, h, d)
+    self.physicsGrid = _Util.Array3D(w, h, d)
     self.gridIndexDepth = 0
 
     -- entity pointers

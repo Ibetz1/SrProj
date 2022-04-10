@@ -11,7 +11,6 @@ local comp = _Util.Object:new({
 function comp:init()
     self.remove = false
 
-    self.origin = _Util.Vector()
     self.w, self.h = -1, -1
 end
 
@@ -22,51 +21,50 @@ function comp:onadd()
 
     -- set positional data
     self.w, self.h = ceil(body.w / Tilesize) + 1, ceil(body.h / Tilesize) + 1
-    local pos = self.parent.physicsBody.gridPosition
-    self.origin.x, self.origin.y = pos.x, pos.y
 
-    self:applyVerteces(false)
+    self:updateGrid(
+        body.gridPosition.x, body.gridPosition.y,
+        body.gridPosition.x, body.gridPosition.y
+    )
 end
 
 -- executes on removal of component
 function comp:onremove() 
-    self.ongrid = true
-    self:applyVerteces()
+    local body = self.parent.physicsBody
+
+    self:updateGrid(
+        body.gridPosition.x, body.gridPosition.y,
+        body.gridPosition.x, body.gridPosition.y,
+        true
+    )
 end
 
--- updates world grid
-function comp:updateGridCoords(x, y, z, remove)
+-- remaps grid coordinates
+function comp:updateGrid(x1, y1, x2, y2, remove)
     local world = self.parent.world
-
-    if remove == false then world.grid:add(self.parent.id, x, y, z, self.parent.gridIndex) end
-    if remove == true then world.grid:remove(x, y, z, self.parent.gridIndex) end
-end
-
--- calculates verteces and adds them to grid
-function comp:applyVerteces(remove)
     local z = self.parent.layer
 
-    -- x axis
+    -- update the coordinate on grid
     for x = 0, self.w - 1 do
         for y = 0, self.h - 1 do
-
-            self:updateGridCoords(self.origin.x + x, self.origin.y + y, z, remove)
+            world.physicsGrid:remove(x1 + x, y1 + y, z, self.parent.gridIndex)
+            
+            if not remove then 
+                world.physicsGrid:add(self.parent.id, x2 + x, y2 + y, z, self.parent.gridIndex)
+            end
         end
     end
 end
 
 -- updates grid component
 function comp:update(dt)
-    if not self.parent.physicsBody.moving then return end
+    local world = self.parent.world
 
-    self:applyVerteces(true)
+    local body = self.parent.physicsBody
+    local x1, y1 = body.gridPosition.x, body.gridPosition.y
+    local x2, y2 = world.physicsGrid:map(body.position.x + body.velocity.x, body.position.y + body.velocity.y)
 
-    local ox, oy = self.origin.x, self.origin.y
-
-    local pos = self.parent.physicsBody.gridPosition
-    self.origin.x, self.origin.y = pos.x, pos.y
-
-    self:applyVerteces(false)
+    self:updateGrid(x1, y1, x2, y2)
 end
 
 function comp:draw()

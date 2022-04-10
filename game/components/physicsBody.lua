@@ -16,17 +16,24 @@ function comp:init(x, y, w, h, properties)
     self.gridPosition = _Util.Vector()
 
     self.properties = {
-        mass = 1
+        mass = 1,
+        static = false
     }
+
+    if properties then
+        for k,v in pairs(properties) do
+            self.properties[k] = v
+        end
+    end
 
     self.w, self.h = w or 0, h or 0
 end
 
 function comp:onadd()
-    self.gridPosition.x, self.gridPosition.y = self.parent.world.grid:map(self.position.x, self.position.y)
+    self.gridPosition.x, self.gridPosition.y = self.parent.world.physicsGrid:map(self.position.x, self.position.y)
 end
 
-function comp:getNextPosition() 
+function comp:getNextPosition()
     return self.position + self.velocity 
 end
 
@@ -40,10 +47,16 @@ end
 
 -- update body
 function comp:update(dt)
+    self.gridPosition.x, self.gridPosition.y = self.parent.world.physicsGrid:map(self.position.x, self.position.y)
+
     -- basic move/slide logic
     self.accellaration = self.accellaration * _Constants.Friction
-    self.velocity = self.velocity + self.accellaration
-    self.velocity = self.velocity * dt
+
+    self.velocity = (self.velocity + self.accellaration) * dt
+
+    if math.abs(self.velocity.x) < 0.0001 then self.velocity.x = 0 end
+    if math.abs(self.velocity.y) < 0.0001 then self.velocity.y = 0 end
+
     self.position = self:getNextPosition()
 
     self.direction.x = 0
@@ -53,8 +66,6 @@ function comp:update(dt)
         self.velocity.x < -0.0001 or self.velocity.x > 0.0001 or
         self.velocity.y < -0.0001 or self.velocity.y > 0.0001
     )
-
-    self.gridPosition.x, self.gridPosition.y = self.parent.world.grid:map(self.position.x, self.position.y)
 end
 
 function comp:draw()
