@@ -20,8 +20,11 @@ end
 -- draws current scene
 function stack:draw()
     if not self.scene then return end
+    love.graphics.push()
 
     self.scenes[self.scene]:draw()
+    
+    love.graphics.pop()
 end
 
 -- makes a new scene

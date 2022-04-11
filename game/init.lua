@@ -13,7 +13,7 @@ _Util = {
 
 _Components = {
     PhysicsBody = require("game.components.physicsBody"),
-    WorldGridUpdater = require("game.components.worldGridUpdater"),
+    PhysicsGridUpdater = require("game.components.physicsGridUpdater"),
     RigidBody = require("game.components.rigidBody")
 }
 
@@ -22,7 +22,8 @@ _Internal = {
     Stack = require("game.internal.stack"),
     EventHandler = require("game.internal.events"),
     Entity = require("game.internal.entity"),
-    World = require("game.internal.world")
+    World = require("game.internal.world"),
+    Lighting = require("game.internal.lighting")
 }
 
 _Res = {

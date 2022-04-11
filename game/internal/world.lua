@@ -20,6 +20,10 @@ function world:init(w, h, d)
     -- settings
     self.offsetDiffuse = 1
     self.zoomDiffuse = 1
+
+    self.lightWorld = _Internal.Lighting({
+        ambient = {0.21,0.21,0.21}
+    })
 end
 
 function world:onadd()
@@ -75,6 +79,7 @@ end
 
 -- update world
 function world:update(dt)
+
     -- update all entities on layer
     for l = 1, self.d do
         -- update entities
