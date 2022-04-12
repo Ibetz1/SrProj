@@ -22,7 +22,7 @@ function comp:onadd()
     local Tilesize = _Constants.Tilesize
 
     -- set positional data
-    self.w, self.h = ceil(body.w / Tilesize) + 2, ceil(body.h / Tilesize) + 2
+    self.w, self.h = ceil(body.w / Tilesize) + 1, ceil(body.h / Tilesize) + 2
 
     self:updateGrid(
         body.gridPosition.x, body.gridPosition.y,

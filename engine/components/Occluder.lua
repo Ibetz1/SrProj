@@ -17,9 +17,11 @@ function comp:onadd()
     local tex = self.parent.texture
 
     self.body = lm:newImage(tex.image)
+    self.w, self.h = tex.w, tex.h
 
     if tex.glow then self.body:setGlowMap(tex.glow) end
     if tex.normal then self.body:setNormalMap(tex.normal) end
+
 
     self.parent.hasOccluder = true
 end

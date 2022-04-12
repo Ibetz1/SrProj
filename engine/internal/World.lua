@@ -22,6 +22,8 @@ function world:init(w, h, d)
     self.offsetDiffuse = 1
     self.zoomDiffuse = 1
 
+    self.initialized = false
+
     self.lightWorld = _Internal.Lighting({
         ambient = {1, 1, 1}
     })
@@ -33,6 +35,8 @@ function world:onadd()
             ent:onadd()
         end
     end
+
+    self.initialized = true
 end
 
 function world:setAmbience(r, g, b)
@@ -71,6 +75,8 @@ function world:addEntity(ent, layer)
     ent.layer = layer
     ent.layerDepth = self.numEntities
     ent.drawLayer = #self.drawOrder[layer]
+
+    if self.initialized then ent:onadd() end
 end
 
 -- swaps draw order between two entities
@@ -79,14 +85,15 @@ function world:swapDrawOrder(ent1, ent2)
     drawOrder[ent1.drawLayer], drawOrder[ent2.drawLayer] = drawOrder[ent2.drawLayer], drawOrder[ent1.drawLayer]
 
     ent1.drawLayer, ent2.drawLayer = ent2.drawLayer, ent1.drawLayer
+end
 
-    -- y sort occluders
-    if ent1.occluder and ent2.occluder then
-        local id1, id2 = ent1.occluder.body.id, ent2.occluder.body.id
-        local lw = self.lightWorld
+-- swaps occluder inceces in light world
+function world:swapOccluders(occ1, occ2)
+    local lw = self.lightWorld
 
-        lw.bodies[id1], lw.bodies[id2] = lw.bodies[id2], lw.bodies[id1]
-    end
+    occ1.id, occ2.id = occ2.id, occ1.id
+
+    lw.bodies[occ1.id], lw.bodies[occ2.id] = lw.bodies[occ2.id], lw.bodies[occ1.id]
 end
 
 -- removes entity

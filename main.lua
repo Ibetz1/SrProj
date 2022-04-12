@@ -1,42 +1,30 @@
 love.graphics.setDefaultFilter("nearest", "nearest")
 require("engine")
+local game = require("game")
+local stack, world, index = game(16, 16, 2, {0.12, 0.12, 0.12})
 
-local stack = _Internal.Stack()
-local world = _Internal.World(30, 30, 1)
-local worldSceneIndex = stack:addScene(world)
+local e = game.entities:block(100, 100, 32, 24, _Assets.machine, _Assets.machine_normal, _Assets.machine_glow)
+local g = game.entities:block(100, 100, 32, 24, _Assets.machine, _Assets.machine_normal, _Assets.machine_glow)
+local f = game.entities:block(100, 100, 32, 24, _Assets.machine, _Assets.machine_normal, _Assets.machine_glow)
+local z = game.entities:block(100, 100, 32, 24, _Assets.machine, _Assets.machine_normal, _Assets.machine_glow)
 
-world:setAmbience(0.12, 0.12, 0.12)
+e.Body.properties.mass = 2
+g.Body.properties.mass = 2
+f.Body.properties.mass = 2
+z.Body.properties.mass = 2
 
-local e = _Internal.Entity()
-e:addComponent(_Components.Ysort())
-e:addComponent(_Components.PhysicsBody(10, 10, 32, 32))
-e:addComponent(_Components.RigidBody())
-e:addComponent(_Components.PhysicsGridUpdater())
-e:addComponent(_Components.Texture(_Assets.machine, _Assets.machine_normal, _Assets.machine_glow), 4)
-e:addComponent(_Components.Occluder())
+local light = game.entities:light(0, 0, 1, 200, 0, 200, 200, 1)
 
 world:addEntity(e)
-
-local g = _Internal.Entity()
-g:addComponent(_Components.Ysort())
-g:addComponent(_Components.PhysicsBody(70, 40, 32, 20))
-g:addComponent(_Components.RigidBody())
-g:addComponent(_Components.PhysicsGridUpdater())
-g:addComponent(_Components.Texture(_Assets.machine, _Assets.machine_normal, _Assets.machine_glow), 4)
-g:addComponent(_Components.Occluder())
-
 world:addEntity(g)
-
-stack:setScene(worldSceneIndex)
-
+world:addEntity(f)
+world:addEntity(z)
 world:setScale(2)
-
-local light = world.lightWorld:newLight(0, 0, 100, 100, 100, 200)
-light:setSmooth(1)
 
 function love.load()
 end
 
+print(e.id)
 
 function love.update(dt)
     light:setPosition(love.mouse.getX() / world.scale, love.mouse.getY() / world.scale, 1)
@@ -51,4 +39,6 @@ end
 
 function love.draw()
     stack:draw()
+
+    love.graphics.print(love.timer.getFPS())
 end
