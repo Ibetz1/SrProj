@@ -1,7 +1,7 @@
 love.graphics.setDefaultFilter("nearest", "nearest")
 require("engine")
 local game = require("game")
-local stack, world, index = game(16, 16, 2, {0.12, 0.12, 0.12})
+local stack, world, index = game(16, 16, 1, {0.12, 0.12, 0.12})
 
 local e = game.entities:block(100, 100, 32, 24, _Assets.machine, _Assets.machine_normal, _Assets.machine_glow)
 local g = game.entities:block(100, 100, 32, 24, _Assets.machine, _Assets.machine_normal, _Assets.machine_glow)

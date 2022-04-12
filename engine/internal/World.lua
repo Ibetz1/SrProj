@@ -113,7 +113,11 @@ end
 
 -- update world
 function world:update(dt)
+<<<<<<< Updated upstream
     self.lightWorld:update(dt)
+=======
+    self.activeLayers = {}
+>>>>>>> Stashed changes
 
     -- update entities
     for l = 1, self.d do
@@ -131,6 +135,11 @@ function world:update(dt)
             ::next::
         end
     end
+<<<<<<< Updated upstream
+=======
+
+    self.lightWorld:update(dt)
+>>>>>>> Stashed changes
 end
 
 -- draw world
@@ -143,6 +152,11 @@ function world:draw()
                 if ent.draw then ent:draw() end
             end
         end
+<<<<<<< Updated upstream
+=======
+
+        -- love.graphics.draw(self.buffer)
+>>>>>>> Stashed changes
     end)
 end
 

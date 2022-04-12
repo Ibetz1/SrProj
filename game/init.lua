@@ -28,6 +28,10 @@ local game = {
 
         self.stack:setScene(self.worldIndex)
         self.world:setAmbience(unpack(worldAmbience or {1, 1, 1}))
+<<<<<<< Updated upstream
+=======
+        -- self.world.lightWorld:setShadowBlur(20)
+>>>>>>> Stashed changes
 
         return self.stack, self.world, self.worldIndex
     end

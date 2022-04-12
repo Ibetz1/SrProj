@@ -105,6 +105,7 @@ function light_world:update(dt)
 end
 
 function light_world:draw(cb)
+<<<<<<< Updated upstream
   util.drawto(self.render_buffer, self.l, self.t, self.s, false, function()
     cb(self.l, self.t, self.w, self.h, self.s)
     _ = self.disableMaterial   or self:drawMaterial(      self.l,self.t,self.w,self.h,self.s)
@@ -114,6 +115,19 @@ function light_world:draw(cb)
     _ = self.disableReflection or self:drawReflection(    self.l,self.t,self.w,self.h,self.s)
   end)
   self.post_shader:drawWith(self.render_buffer, self.l, self.t, self.s)
+=======
+    util.drawto(self.render_buffer, self.l, self.t, self.s, false, function()
+      cb(self.l, self.t, self.w, self.h, self.s)
+
+      _ = self.disableMaterial or self:drawMaterial(self.l, self.t, self.w, self.h, self.s)
+      self:drawShadows(self.l, self.t, self.w, self.h, self.s)
+      _ = self.disableGlow or self:drawGlow(self.l, self.t, self.w, self.h, self.s)
+      _ = self.disableRefraction or self:drawRefraction(self.l, self.t, self.w, self.h, self.s)
+      _ = self.disableReflection or self:drawReflection(self.l, self.t, self.w, self.h, self.s)
+    end)
+
+    self.post_shader:drawWith(self.render_buffer, self.l, self.t, self.s)
+>>>>>>> Stashed changes
 end
 
 -- draw normal shading
@@ -172,8 +186,13 @@ function light_world:drawShadows(l,t,w,h,s)
     self.shadowShader:send("lightPosition", {(light.x + l/s) * s, (light.y + t/s) * s, (light.z * 10) / 255})
     self.shadowShader:send('lightRange', light.range * s)
     self.shadowShader:send("lightSmooth", light.smooth)
+<<<<<<< Updated upstream
     self.shadowShader:send("lightGlow", {1.0 - light.glowSize, light.glowStrength})
     -- self.shadowShader:send("scale", self.s)
+=======
+    self.shadowShader:send("lightGlow", { 1.0 - light.glowSize, light.glowStrength })
+
+>>>>>>> Stashed changes
     util.drawCanvasToCanvas(self.shadowMap, self.shadow_buffer, {
       blendmode = 'add',
       shader = self.shadowShader,
