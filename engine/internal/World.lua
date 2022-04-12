@@ -74,7 +74,11 @@ end
 
 -- pre render pass
 function world:preRender()
-
+    for l = 1, self.d do
+        for _, ent in pairs(self.entities[l]) do
+            if ent.draw then ent:draw() end
+        end
+    end
 end
 
 -- update world
@@ -101,12 +105,6 @@ end
 -- draw world
 function world:draw()
     self:preRender()
-
-    for l = 1, self.d do
-        for _, ent in pairs(self.entities[l]) do
-            if ent.draw then ent:draw() end
-        end
-    end
 end
 
 return world

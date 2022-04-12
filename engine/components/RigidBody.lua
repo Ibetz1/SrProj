@@ -7,10 +7,11 @@ end
 
 local comp = _Util.Object:new({
     name = "rigidBody",
+    type = "collider",
     embed = false,
     requires = {
         "physicsBody",
-        "worldGridUpdater"
+        "gridUpdater"
     }
 })
 
@@ -26,31 +27,31 @@ function comp:onadd()
     local grid = world.physicsGrid
 
     -- redfine the onmove function
-    function self.parent.physicsBody.getNextPosition(body)
+    function self.parent.Body.getNextPosition(body, offset)
         if body.properties.static then return body.position + body.velocity end
 
         -- define locals
-        local gridUpdater = self.parent.worldGridUpdater
+        local gridUpdater = self.parent.physicsGridUpdater
 
         -- iterate through occupied grid coordinates
         for x = 0, gridUpdater.w - 1 do
             for y = 0, gridUpdater.h - 1 do  
-                self:moveAndSlide(body, x, y)
+                self:moveAndSlide(body, x, y, offset)
             end
         end
 
-        return body.position + body.velocity - self.clippingDistance
+        return body.position + offset - self.clippingDistance
     end
 end
 
 -- applies collision clipping
-function comp:moveAndSlide(body, ox, oy)
+function comp:moveAndSlide(body, ox, oy, realOffset)
     local world = self.parent.world
     local grid = world.physicsGrid
 
-    local pos, vel = body.position, body.velocity
+    local pos = body.position
 
-    local px, py = grid:map(pos.x + vel.x, pos.y + vel.y)
+    local px, py = grid:map(pos.x + realOffset.x, pos.y + realOffset.y)
     local pz = self.parent.layer
 
     local cast = grid:get(px + ox, py + oy, pz)
@@ -63,7 +64,7 @@ function comp:moveAndSlide(body, ox, oy)
             if not obj.components.rigidBody then goto next end
 
             -- get clipping distance
-            self:resolveCollision(pos.x + vel.x, pos.y + vel.y, obj.components.rigidBody)
+            self:resolveCollision(pos.x + realOffset.x, pos.y + realOffset.y, obj.components.rigidBody)
 
             ::next::
         end
@@ -72,7 +73,7 @@ end
 
 -- gets clip from cast
 function comp:resolveCollision(x1, y1, obj)
-    local body, objBody = self.parent.physicsBody, obj.parent.physicsBody
+    local body, objBody = self.parent.Body, obj.parent.body
 
     if not objBody then return end
 

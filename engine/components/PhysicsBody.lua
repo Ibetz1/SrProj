@@ -1,7 +1,11 @@
 local comp = _Util.Object:new({
     embed = true,
-    name = "physicsBody",
-    requires = {}
+    name = "Body",
+    type = "physicsBody",
+    requires = {},
+    exclude = {
+        "worldBody"
+    }
 })
 
 function comp:init(x, y, w, h, properties)
@@ -14,6 +18,7 @@ function comp:init(x, y, w, h, properties)
     self.accellaration = _Util.Vector()
 
     self.gridPosition = _Util.Vector()
+    self.positionOffset = _Util.Vector()
 
     self.properties = {
         mass = 1,
@@ -33,8 +38,9 @@ function comp:onadd()
     self.gridPosition.x, self.gridPosition.y = self.parent.world.physicsGrid:map(self.position.x, self.position.y)
 end
 
-function comp:getNextPosition()
-    return self.position + self.velocity 
+-- default function for clipping (overridden by rigid body)
+function comp:getNextPosition(offset)
+    return self.position + offset
 end
 
 -- apply an impulse to body
@@ -43,6 +49,14 @@ function comp:impulse(speed, dir, axis)
     self.direction:unit()
 
     self.accellaration[axis] = self.direction[axis] * speed
+end
+
+-- sets position of component
+function comp:setPosition(x, y)
+    self.positionOffset.x = x - self.position.x
+    self.positionOffset.y = y - self.position.y
+
+    self.position = self:getNextPosition(self.positionOffset)
 end
 
 -- update body
@@ -57,7 +71,7 @@ function comp:update(dt)
     if math.abs(self.velocity.x) < 0.0001 then self.velocity.x = 0 end
     if math.abs(self.velocity.y) < 0.0001 then self.velocity.y = 0 end
 
-    self.position = self:getNextPosition()
+    self.position = self:getNextPosition(self.velocity)
 
     self.direction.x = 0
     self.direction.y = 0

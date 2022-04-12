@@ -10,11 +10,6 @@ local vec2 = {
     -- custom type
     __type = 'vector2',
 
-    -- custom unpack functionality
-    __unpack = function(a)
-        return a.x, a.y
-    end,
-
     -- custom print function
     __tostring = function(vec) 
         return 'vec2(' .. vec.x .. ', ' .. vec.y .. ')'
@@ -156,9 +151,8 @@ function vec2:setLength(len)
 end
 
 -- get distance between vectors
-function vec2:getDist(b)
-    local distSq = (self.x - b.x) ^ 2 + (self.y - b.y) ^ 2
-    return sqrt(distSq)
+function vec2:dist(b)
+    return math.sqrt(math.pow(b.x - self.x, 2) + math.pow(b.y-self.y, 2))
 end
 
 -- get normalized vector
@@ -196,6 +190,11 @@ function vec2:rotate(angle)
     local dy = sin(-angle)
 
     return vec2(dx*self.x - dy*self.y, dy*self.x + dx*self.y)
+end
+
+-- custom unpack functionality
+function vec2:unpack(a)
+    return a.x, a.y
 end
 
 -- creates a new vector

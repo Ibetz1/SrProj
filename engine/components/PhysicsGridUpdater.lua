@@ -1,7 +1,8 @@
 local ceil, floor = math.ceil, math.floor
 
 local comp = _Util.Object:new({
-    name = "worldGridUpdater",
+    name = "physicsGridUpdater",
+    type = "gridUpdater",
     embed = true,
     requires = {
         "physicsBody"
@@ -16,7 +17,7 @@ end
 
 -- executes addition of component
 function comp:onadd()
-    local body = self.parent.physicsBody
+    local body = self.parent.Body
     local Tilesize = _Constants.Tilesize
 
     -- set positional data
@@ -30,7 +31,7 @@ end
 
 -- executes on removal of component
 function comp:onremove() 
-    local body = self.parent.physicsBody
+    local body = self.parent.Body
 
     self:updateGrid(
         body.gridPosition.x, body.gridPosition.y,
@@ -60,7 +61,7 @@ end
 function comp:update(dt)
     local world = self.parent.world
 
-    local body = self.parent.physicsBody
+    local body = self.parent.Body
     local x1, y1 = body.gridPosition.x, body.gridPosition.y
     local x2, y2 = world.physicsGrid:map(body.position.x + body.velocity.x, body.position.y + body.velocity.y)
 
