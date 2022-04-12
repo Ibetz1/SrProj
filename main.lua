@@ -19,7 +19,7 @@ world:addEntity(e)
 
 local g = _Internal.Entity()
 g:addComponent(_Components.Ysort())
-g:addComponent(_Components.PhysicsBody(70, 40, 32, 32))
+g:addComponent(_Components.PhysicsBody(70, 40, 32, 20))
 g:addComponent(_Components.RigidBody())
 g:addComponent(_Components.PhysicsGridUpdater())
 g:addComponent(_Components.Texture(_Assets.machine, _Assets.machine_normal, _Assets.machine_glow), 4)

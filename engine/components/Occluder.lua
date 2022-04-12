@@ -15,7 +15,6 @@ end
 function comp:onadd()
     local lm = self.parent.world.lightWorld
     local tex = self.parent.texture
-    local body = self.parent.Body
 
     self.body = lm:newImage(tex.image)
 

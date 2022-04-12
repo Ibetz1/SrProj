@@ -68,13 +68,13 @@ function comp:resolveCollision(x1, y1, obj)
     local w1, h1, w2, h2 = body.w, body.h,  objBody.w, objBody.h
     local x2, y2 = objBody.position.x, objBody.position.y
 
+    local dir = body.direction
+
     -- return clipping distance
     if aabb(x1, y1, w1, h1, x2, y2, w2, h2) then
 
-        local cx, cy = 0, 0
-
-        local dx = (x1 + w1 / 2) - (x2 + w2 / 2)
-        local dy = (y1 + h1 / 2) - (y2 + h2 / 2)
+        local dx = ((x1 + w1 / 2) - (x2 + w2 / 2)) / (w1 + w2) / 2
+        local dy = ((y1 + h1 / 2) - (y2 + h2 / 2)) / (h1 + h2) / 2
 
         -- horizontal collision case
         if math.abs(dx) > math.abs(dy) then
@@ -87,10 +87,9 @@ function comp:resolveCollision(x1, y1, obj)
             -- apply velocity
             if objBody.properties.static then return end
 
-            local dir = body.direction.x
             local speed = math.abs(body.accellaration.x * 1 / _Constants.Friction) / objBody.properties.mass
 
-            objBody:impulse(speed, dir, "x")
+            objBody:impulse(speed, dir.x, "x")
 
         -- verticle collision case
         else
@@ -103,12 +102,13 @@ function comp:resolveCollision(x1, y1, obj)
             -- apply velocity
             if objBody.properties.static then return end
 
-            local dir = body.direction.y
             local speed = math.abs(body.accellaration.y * 1 / _Constants.Friction) / objBody.properties.mass
 
-            objBody:impulse(speed, dir, "y")
+            objBody:impulse(speed, dir.y, "y")
         end
     end
+
+    
 end
 
 function comp:update(dt)
