@@ -1,4 +1,5 @@
 local function aabb(x1, y1, w1, h1, x2, y2, w2, h2)
+
     return x1 + w1 >= x2 and 
            x1 <= x2 + w2 and
            y1 + h1 >= y2 and
@@ -30,50 +31,37 @@ function comp:onadd()
     function self.parent.Body.getNextPosition(body, offset)
         if body.properties.static then return body.position + body.velocity end
 
-        -- define locals
-        local gridUpdater = self.parent.physicsGridUpdater
-
-        -- iterate through occupied grid coordinates
-        for x = 0, gridUpdater.w - 1 do
-            for y = 0, gridUpdater.h - 1 do  
-                self:moveAndSlide(body, x, y, offset)
-            end
-        end
+        -- calculate collisions
+        self:moveAndSlide(body, offset)
 
         return body.position + offset - self.clippingDistance
     end
 end
 
 -- applies collision clipping
-function comp:moveAndSlide(body, ox, oy, realOffset)
+function comp:moveAndSlide(body, realOffset)
     local world = self.parent.world
-    local grid = world.physicsGrid
 
     local pos = body.position
-
-    local px, py = grid:map(pos.x + realOffset.x, pos.y + realOffset.y)
-    local pz = self.parent.layer
-
-    local cast = grid:get(px + ox, py + oy, pz)
+    local cast = self.parent.physicsGridUpdater.cast
 
     -- check ray cast for other entities
     for _, id in pairs(cast) do
-        if id ~= self.parent.id then
-            local obj = world:getEntity(id)
+        local obj = world:getEntity(id)
 
-            if not obj.components.rigidBody then goto next end
+        if not obj.components.rigidBody then goto next end
 
-            -- get clipping distance
-            self:resolveCollision(pos.x + realOffset.x, pos.y + realOffset.y, obj.components.rigidBody)
+        -- get clipping distance
+        self:resolveCollision(pos.x + realOffset.x, pos.y + realOffset.y, obj.components.rigidBody)
 
-            ::next::
-        end
+        ::next::
     end
 end
 
 -- gets clip from cast
 function comp:resolveCollision(x1, y1, obj)
-    local body, objBody = self.parent.Body, obj.parent.body
+
+    local body, objBody = self.parent.Body, obj.parent.Body
 
     if not objBody then return end
 
@@ -82,6 +70,7 @@ function comp:resolveCollision(x1, y1, obj)
 
     -- return clipping distance
     if aabb(x1, y1, w1, h1, x2, y2, w2, h2) then
+
         local cx, cy = 0, 0
 
         local dx = (x1 + w1 / 2) - (x2 + w2 / 2)
@@ -123,6 +112,7 @@ function comp:resolveCollision(x1, y1, obj)
 end
 
 function comp:update(dt)
+
     self.clippingDistance:zero()
 end
 

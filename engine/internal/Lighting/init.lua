@@ -106,7 +106,7 @@ end
 
 function light_world:draw(cb)
   util.drawto(self.render_buffer, self.l, self.t, self.s, false, function()
-    cb(self.l,self.t,self.w,self.h,self.s)
+    cb(self.l, self.t, self.w, self.h, self.s)
     _ = self.disableMaterial   or self:drawMaterial(      self.l,self.t,self.w,self.h,self.s)
     self:drawShadows( self.l,self.t,self.w,self.h,self.s)
     _ = self.disableGlow       or self:drawGlow(          self.l,self.t,self.w,self.h,self.s)
@@ -133,6 +133,7 @@ function light_world:drawShadows(l,t,w,h,s)
   love.graphics.setCanvas( self.shadow_buffer )
   love.graphics.clear()
   love.graphics.setCanvas()
+
   for i = 1, #self.visibleLights do
     local light = self.visibleLights[i]
     -- create shadow map for this light
@@ -146,6 +147,7 @@ function light_world:drawShadows(l,t,w,h,s)
         local angle = light.direction - (light.angle / 2.0)
         love.graphics.arc("fill", light.x, light.y, light.range, angle, angle + light.angle)
       end)
+
       love.graphics.setStencilTest("greater",0)
       love.graphics.stencil(function()
         love.graphics.setShader(self.image_mask)
@@ -157,6 +159,7 @@ function light_world:drawShadows(l,t,w,h,s)
         love.graphics.setShader()
       end)
       love.graphics.setStencilTest("equal", 0)
+      
       for k = 1, #self.bodies do
         if self.bodies[k]:inLightRange(light) and self.bodies[k]:isVisible() then
           self.bodies[k]:drawShadow(light)
@@ -167,16 +170,17 @@ function light_world:drawShadows(l,t,w,h,s)
     -- draw scene for this light using normals and shadowmap
     self.shadowShader:send('lightColor', {light.red, light.green, light.blue})
     self.shadowShader:send("lightPosition", {(light.x + l/s) * s, (light.y + t/s) * s, (light.z * 10) / 255})
-    self.shadowShader:send('lightRange',light.range * s)
+    self.shadowShader:send('lightRange', light.range * s)
     self.shadowShader:send("lightSmooth", light.smooth)
     self.shadowShader:send("lightGlow", {1.0 - light.glowSize, light.glowStrength})
+    -- self.shadowShader:send("scale", self.s)
     util.drawCanvasToCanvas(self.shadowMap, self.shadow_buffer, {
       blendmode = 'add',
       shader = self.shadowShader,
       stencil = function()
         local angle = light.direction - (light.angle / 2.0)
         love.graphics.arc(
-          "fill", (light.x + l/s) * s, (light.y + t/s) * s, light.range, angle, angle + light.angle
+          "fill", (light.x + l/s) * s, (light.y + t/s) * s, light.range * s, angle, angle + light.angle
         )
       end
     })

@@ -6,6 +6,13 @@
     "Lua.workspace.checkThirdParty": false,
     "Lua.diagnostics.disable": [
         "redundant-parameter",
-        "different-requires"
+        "different-requires",
+        "undefined-field"
+    ],
+    "Lua.diagnostics.globals": [
+        "_INTERNALPATH",
+        "_UTILITYPATH",
+        "_COMPONENTPATH",
+        "_IMAGEPATH"
     ]
 }

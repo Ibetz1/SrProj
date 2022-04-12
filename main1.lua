@@ -1,5 +1,5 @@
 love.graphics.setDefaultFilter("nearest", "nearest")
-require("game")
+require("engine")
 
 
 local lightWorld, lightMouse
@@ -24,9 +24,6 @@ function love.load()
   lightMouse = lightWorld:newLight(0, 0, 1, 0.49, 1, 300)
   lightMouse:setGlowStrength(0.3)
 
-  scanLight = lightWorld:newLight(400, 550, 1, 1, 0.24, 400)
-  scanLight:setAngle(0.7)
-  scanLight:setDirection(3.4)
 
   floatLight = lightWorld:newLight(100, 100, 0.49, 1, 1, 200)
   floatLight:setGlowStrength(0.3)
@@ -40,8 +37,9 @@ function love.load()
 end
 
 function love.update(dt, x, y, scale)
+
+
   floatLight:setPosition(math.sin(-1*lightDirection)*200+400, 100)
-  scanLight:setDirection(math.sin(lightDirection)+4.8)
   lightDirection = lightDirection + dt
 
   love.window.setTitle("Light vs. Shadow Engine (FPS:" .. love.timer.getFPS() .. ")")

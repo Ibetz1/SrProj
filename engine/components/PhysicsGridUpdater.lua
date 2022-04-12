@@ -11,6 +11,7 @@ local comp = _Util.Object:new({
 
 function comp:init()
     self.remove = false
+    self.cast = {}
 
     self.w, self.h = -1, -1
 end
@@ -21,7 +22,7 @@ function comp:onadd()
     local Tilesize = _Constants.Tilesize
 
     -- set positional data
-    self.w, self.h = ceil(body.w / Tilesize) + 1, ceil(body.h / Tilesize) + 1
+    self.w, self.h = ceil(body.w / Tilesize) + 2, ceil(body.h / Tilesize) + 2
 
     self:updateGrid(
         body.gridPosition.x, body.gridPosition.y,
@@ -48,10 +49,17 @@ function comp:updateGrid(x1, y1, x2, y2, remove)
     -- update the coordinate on grid
     for x = 0, self.w - 1 do
         for y = 0, self.h - 1 do
-            world.physicsGrid:remove(x1 + x, y1 + y, z, self.parent.gridIndex)
-            
-            if not remove then 
-                world.physicsGrid:add(self.parent.id, x2 + x, y2 + y, z, self.parent.gridIndex)
+            world.physicsGrid:remove(x1 + x, y1 + y, z, self.parent.layerDepth)
+
+            if not remove then
+
+                -- get all surrounding entities
+                local cast = world.physicsGrid:get(x2 + x, y2 + y, z)
+                for _, id in pairs(cast) do
+                    if id ~= self.parent.id then table.insert(self.cast, id) end
+                end
+
+                world.physicsGrid:add(self.parent.id, x2 + x, y2 + y, z, self.parent.layerDepth)
             end
         end
     end
@@ -64,6 +72,10 @@ function comp:update(dt)
     local body = self.parent.Body
     local x1, y1 = body.gridPosition.x, body.gridPosition.y
     local x2, y2 = world.physicsGrid:map(body.position.x + body.velocity.x, body.position.y + body.velocity.y)
+
+    for index, _ in pairs(self.cast) do
+        self.cast[index] = nil
+    end
 
     self:updateGrid(x1, y1, x2, y2)
 end

@@ -3,11 +3,12 @@ local world = _Util.Object:new()
 function world:init(w, h, d)
     self.w, self.h, self.d = w, h, d
     self.physicsGrid = _Util.Array3D(w, h, d)
-    self.gridIndexDepth = 0
 
     -- entity pointers
     self.entities = {}
-    for l = 1, d  do self.entities[l] = {} end
+    self.drawOrder = {}
+    self.numEntities = 0
+    for l = 1, d  do self.entities[l], self.drawOrder[l] = {}, {} end
 
     self.buffer = love.graphics.newCanvas(_Res[1], _Res[2])
 
@@ -22,7 +23,7 @@ function world:init(w, h, d)
     self.zoomDiffuse = 1
 
     self.lightWorld = _Internal.Lighting({
-        ambient = {0.21,0.21,0.21}
+        ambient = {1, 1, 1}
     })
 end
 
@@ -34,6 +35,16 @@ function world:onadd()
     end
 end
 
+function world:setAmbience(r, g, b)
+    self.lightWorld.ambient = {r, g, b}
+end
+
+-- scales world
+function world:setScale(scale)
+    self.scale = scale
+    self.lightWorld:setScale(2)
+end
+
 -- gets entity by id
 function world:getEntity(id)
     local layer = self.entities[id]; if not layer then return end
@@ -42,14 +53,33 @@ end
 
 -- adds entity to world
 function world:addEntity(ent, layer)
+    self.numEntities = self.numEntities + 1
     local layer = layer or 1
-    self.gridIndexDepth = self.gridIndexDepth + 1
 
+    table.insert(self.drawOrder[layer], ent.id)
+    
     self.entities[layer][ent.id] = ent
     self.entities[ent.id] = layer
     ent.world = self
     ent.layer = layer
-    ent.gridIndex = self.gridIndexDepth
+    ent.layerDepth = self.numEntities
+    ent.drawLayer = #self.drawOrder[layer]
+end
+
+-- swaps draw order between two entities
+function world:swapDrawOrder(ent1, ent2)
+    local drawOrder = self.drawOrder[ent1.layer]
+    drawOrder[ent1.drawLayer], drawOrder[ent2.drawLayer] = drawOrder[ent2.drawLayer], drawOrder[ent1.drawLayer]
+
+    ent1.drawLayer, ent2.drawLayer = ent2.drawLayer, ent1.drawLayer
+
+    -- y sort occluders
+    if ent1.occluder and ent2.occluder then
+        local id1, id2 = ent1.occluder.body.id, ent2.occluder.body.id
+        local lw = self.lightWorld
+
+        lw.bodies[id1], lw.bodies[id2] = lw.bodies[id2], lw.bodies[id1]
+    end
 end
 
 -- removes entity
@@ -62,32 +92,19 @@ function world:removeEntity(id)
     self.entities[layer][id].remove = true
 end
 
--- zooms world
-function world:zoom(scale)
-    self.scale = scale
-end
-
 -- translates world
 function world:translate(x, y)
     self.offset.x, self.offset.y = x, y
 end
 
--- pre render pass
-function world:preRender()
-    for l = 1, self.d do
-        for _, ent in pairs(self.entities[l]) do
-            if ent.draw then ent:draw() end
-        end
-    end
-end
-
 -- update world
 function world:update(dt)
+    self.lightWorld:update(dt)
 
-    -- update all entities on layer
+    -- update entities
     for l = 1, self.d do
-        -- update entities
         for id, ent in pairs(self.entities[l]) do
+
             if ent.remove then 
                 ent:onremove()
                 self.entities[l][id] = nil 
@@ -95,16 +112,24 @@ function world:update(dt)
                 goto next 
             end
 
-            if ent.update then ent:update(dt) end
-        end
+            if ent.draw then ent:update(dt) end
 
-        ::next::
+            ::next::
+        end
     end
 end
 
 -- draw world
 function world:draw()
-    self:preRender()
+    self.lightWorld:draw(function() 
+        love.graphics.clear(0.5, 0.5, 0.5)
+        for l = 1, self.d do
+            for _, id in pairs(self.drawOrder[l]) do
+                local ent = self.entities[l][id]
+                if ent.draw then ent:draw() end
+            end
+        end
+    end)
 end
 
 return world

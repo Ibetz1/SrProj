@@ -22,7 +22,7 @@ vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 pixel_coords) {
     vec4 pixel;
 
     //calculate attenuation of light based on the distance
-    float att = clamp((1.0 - dist / lightRange) / lightSmooth, 0.0, 1.0);
+    float att = clamp((1.0 - (dist) / lightRange) / lightSmooth, 0.0, 1.0);
     // if not on the normal map draw attenuated shadows
     if(normalColor.a <= 0.0) {
       //start with a dark color and add in the light color and shadow color

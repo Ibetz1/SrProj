@@ -37,7 +37,6 @@ function comp:update(dt)
 end
 
 function comp:draw()
-    love.graphics.rectangle("line", self.position.x, self.position.y, self.w, self.h)
 end
 
 return comp

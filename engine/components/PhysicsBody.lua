@@ -83,13 +83,6 @@ function comp:update(dt)
 end
 
 function comp:draw()
-    love.graphics.line(
-        self.position.x + self.w / 2, self.position.y + self.h / 2,
-        self.position.x + self.w / 2+ self.velocity.x * 10,
-        self.position.y + self.h / 2+ self.velocity.y * 10
-    )
-
-    love.graphics.rectangle("line", self.position.x, self.position.y, self.w, self.h)
 end
 
 return comp
