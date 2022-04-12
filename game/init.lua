@@ -29,7 +29,6 @@ local game = {
 
         self.stack:setScene(self.worldIndex)
         self.world:setAmbience(unpack(worldAmbience or {1, 1, 1}))
-        self.world.lightWorld:setShadowBlur(20)
 
         return self.stack, self.world, self.worldIndex
     end
