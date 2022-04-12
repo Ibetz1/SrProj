@@ -39,7 +39,7 @@ end
 
 
 function love.update(dt)
-    light:setPosition(love.mouse.getX() / world.scale, love.mouse.getY() / world.scale)
+    light:setPosition(love.mouse.getX() / world.scale, love.mouse.getY() / world.scale, 1)
 
     if love.keyboard.isDown("w") then e.Body:impulse(100, -1, "y") end
     if love.keyboard.isDown("a") then e.Body:impulse(100, -1, "x") end

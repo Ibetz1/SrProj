@@ -45,6 +45,13 @@ function world:setScale(scale)
     self.lightWorld:setScale(2)
 end
 
+-- creates a light
+function world:newLight(x, y, z, r, g, b, range)
+    local l = self.lightWorld:newLight(x, y, r, g, b, range)
+    l:setPosition(x, y, z)
+    return l
+end
+
 -- gets entity by id
 function world:getEntity(id)
     local layer = self.entities[id]; if not layer then return end
