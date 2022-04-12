@@ -3,11 +3,12 @@ local game = {
         block = function(_, x, y, w, h, texture, normal, glow)
             local ent = _Internal.Entity()
             ent:addComponent(_Components.Ysort())
+            ent:addComponent(_Components.Occluder())
+            ent:addComponent(_Components.Texture(texture, normal, glow), 4)
+
             ent:addComponent(_Components.PhysicsBody(x, y, w, h))
             ent:addComponent(_Components.RigidBody())
             ent:addComponent(_Components.PhysicsGridUpdater())
-            ent:addComponent(_Components.Texture(texture, normal, glow), 4)
-            ent:addComponent(_Components.Occluder())
 
             return ent
         end,
@@ -28,11 +29,7 @@ local game = {
 
         self.stack:setScene(self.worldIndex)
         self.world:setAmbience(unpack(worldAmbience or {1, 1, 1}))
-<<<<<<< Updated upstream
-=======
         -- self.world.lightWorld:setShadowBlur(20)
->>>>>>> Stashed changes
-
         return self.stack, self.world, self.worldIndex
     end
 }

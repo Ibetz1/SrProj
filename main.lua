@@ -3,15 +3,12 @@ require("engine")
 local game = require("game")
 local stack, world, index = game(16, 16, 1, {0.12, 0.12, 0.12})
 
+love.window.setVSync(1)
+
 local e = game.entities:block(100, 100, 32, 24, _Assets.machine, _Assets.machine_normal, _Assets.machine_glow)
 local g = game.entities:block(100, 100, 32, 24, _Assets.machine, _Assets.machine_normal, _Assets.machine_glow)
 local f = game.entities:block(100, 100, 32, 24, _Assets.machine, _Assets.machine_normal, _Assets.machine_glow)
 local z = game.entities:block(100, 100, 32, 24, _Assets.machine, _Assets.machine_normal, _Assets.machine_glow)
-
-e.Body.properties.mass = 2
-g.Body.properties.mass = 2
-f.Body.properties.mass = 2
-z.Body.properties.mass = 2
 
 local light = game.entities:light(0, 0, 1, 200, 0, 200, 200, 1)
 
@@ -19,12 +16,9 @@ world:addEntity(e)
 world:addEntity(g)
 world:addEntity(f)
 world:addEntity(z)
-world:setScale(2)
 
 function love.load()
 end
-
-print(e.id)
 
 function love.update(dt)
     light:setPosition(love.mouse.getX() / world.scale, love.mouse.getY() / world.scale, 1)

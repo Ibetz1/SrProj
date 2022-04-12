@@ -8,9 +8,11 @@ function world:init(w, h, d)
     self.entities = {}
     self.drawOrder = {}
     self.numEntities = 0
-    for l = 1, d  do self.entities[l], self.drawOrder[l] = {}, {} end
+    self.buffer = love.graphics.newCanvas()
 
-    self.buffer = love.graphics.newCanvas(_Res[1], _Res[2])
+    for l = 1, d  do 
+        self.entities[l], self.drawOrder[l] = {}, {}
+    end
 
     self.scale = 1
     self.currentScale = 1
@@ -25,7 +27,8 @@ function world:init(w, h, d)
     self.initialized = false
 
     self.lightWorld = _Internal.Lighting({
-        ambient = {1, 1, 1}
+        ambient = {1, 1, 1},
+        layers = d
     })
 end
 
@@ -41,6 +44,13 @@ end
 
 function world:setAmbience(r, g, b)
     self.lightWorld.ambient = {r, g, b}
+end
+
+-- resizes screen
+function world:adjustScreenSize()
+    self.lightWorld:refreshScreenSize(
+        love.graphics.getWidth(), love.graphics.getHeight()
+    )
 end
 
 -- scales world
@@ -89,11 +99,12 @@ end
 
 -- swaps occluder inceces in light world
 function world:swapOccluders(occ1, occ2)
-    local lw = self.lightWorld
+    local l1, l2 = occ1.layer, occ2.layer
+    if l1 ~= l2 then return end
+    local lw = self.lightWorld.bodies[l1]
 
+    lw[occ1.id], lw[occ2.id] = lw[occ2.id], lw[occ1.id]
     occ1.id, occ2.id = occ2.id, occ1.id
-
-    lw.bodies[occ1.id], lw.bodies[occ2.id] = lw.bodies[occ2.id], lw.bodies[occ1.id]
 end
 
 -- removes entity
@@ -113,14 +124,20 @@ end
 
 -- update world
 function world:update(dt)
-<<<<<<< Updated upstream
+
     self.lightWorld:update(dt)
-=======
+
     self.activeLayers = {}
->>>>>>> Stashed changes
+
+    self.activeLayers = {}
+
+    love.graphics.setCanvas(self.buffer)
+    love.graphics.clear(0, 0, 0, 0)
 
     -- update entities
     for l = 1, self.d do
+
+        -- update entities
         for id, ent in pairs(self.entities[l]) do
 
             if ent.remove then 
@@ -130,34 +147,41 @@ function world:update(dt)
                 goto next 
             end
 
-            if ent.draw then ent:update(dt) end
+            if ent.update then ent:update(dt) end
 
             ::next::
         end
+
+        -- pre render entities
+        for _, id in pairs(self.drawOrder[l]) do
+            local ent = self.entities[l][id]
+            if ent.draw then ent:draw() end
+        end
     end
-<<<<<<< Updated upstream
-=======
 
     self.lightWorld:update(dt)
->>>>>>> Stashed changes
+    love.graphics.setCanvas()
+
+    self.lightWorld:update(dt)
 end
 
 -- draw world
 function world:draw()
     self.lightWorld:draw(function() 
         love.graphics.clear(0.5, 0.5, 0.5)
+
         for l = 1, self.d do
             for _, id in pairs(self.drawOrder[l]) do
                 local ent = self.entities[l][id]
                 if ent.draw then ent:draw() end
             end
         end
-<<<<<<< Updated upstream
-=======
 
-        -- love.graphics.draw(self.buffer)
->>>>>>> Stashed changes
+        love.graphics.draw(self.buffer)
+
     end)
+
+                
 end
 
 return world

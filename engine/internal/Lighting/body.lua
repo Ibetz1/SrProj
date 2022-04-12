@@ -4,7 +4,7 @@ local util        = require(_PACKAGE..'/util')
 local anim8       = require(_PACKAGE..'/anim8')
 local vector      = require(_PACKAGE..'/vector')
 
-local body        = {}
+local body = {}
 body.__index = body
 
 body.glowShader     = love.graphics.newShader(_PACKAGE.."/shaders/glow.glsl")
@@ -14,6 +14,7 @@ local function new(id, type, ...)
   local args = {...}
   local obj = setmetatable({}, body)
   obj.id = id
+  obj.layer = 1
   obj.type = type
   obj.shine = true
   obj.red = 1.0
@@ -128,6 +129,16 @@ function body:refresh()
     end
     self:commit_changes()
   end
+end
+
+function body:setLayer(l, world)
+  if l == self.layer then return end
+  world.bodies[l][self.id] = world.bodies[self.layer][self.id]
+  table.remove(world.bodies[self.layer], self.id)
+
+  -- set layer and id
+  self.layer = l
+  self.id = #world.bodies[l]
 end
 
 function body:has_changed()
