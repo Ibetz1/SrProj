@@ -28,18 +28,7 @@ function comp:update(dt)
             if self.parent.drawLayer < ent.drawLayer then
                 world:swapDrawOrder(ent, self.parent)
             end
-
-            -- check for occluders
-            local occ1, occ2 = self.parent.occluder, ent.occluder
-            if not occ1 or not occ2 then goto next end
-
-            local id1, id2 = occ1.body.id, occ2.body.id
             
-            if id1 < id2 then
-                world:swapOccluders(occ1.body, occ2.body)
-            end
-
-            ::next::
         end
         
         ::next::

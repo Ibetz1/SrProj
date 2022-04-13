@@ -3,7 +3,6 @@ local game = {
         block = function(_, x, y, w, h, texture, normal, glow)
             local ent = _Internal.Entity()
             ent:addComponent(_Components.Ysort())
-            ent:addComponent(_Components.Occluder())
             ent:addComponent(_Components.Texture(texture, normal, glow), 4)
 
             ent:addComponent(_Components.PhysicsBody(x, y, w, h))
@@ -11,14 +10,6 @@ local game = {
             ent:addComponent(_Components.PhysicsGridUpdater())
 
             return ent
-        end,
-
-        light = function(self, x, y, z, r, g, b, range, smoothing)
-            local light = self.world.lightWorld:newLight(x, y, r, g, b, range)
-            light:setPosition(x, y, z)
-            light:setSmooth(smoothing)
-
-            return light
         end
     },
 
@@ -28,8 +19,6 @@ local game = {
         self.worldIndex = self.stack:addScene(self.world)
 
         self.stack:setScene(self.worldIndex)
-        self.world:setAmbience(unpack(worldAmbience or {1, 1, 1}))
-        self.world.lightWorld:setShadowBlur(2)
         return self.stack, self.world, self.worldIndex
     end
 }

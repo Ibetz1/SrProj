@@ -3,7 +3,6 @@ local stack = _Util.Object:new()
 function stack:init()
     self.scenes = {}
     self.scene = nil
-    self.fullscreen = false
 
     self.eventHandler = _Internal.EventHandler()
     _G.globalEventHandler = self.eventHandler
@@ -37,21 +36,6 @@ function stack:update(dt)
     self.scenes[self.scene]:update(dt)
 
     self.eventHandler:update()
-end
-
--- sets full screen
-function stack:setFullscreen()
-    self.fullscreen = not self.fullscreen
-
-    love.window.setFullscreen(self.fullscreen)
-
-    _Res[1], _Res[2] = love.graphics.getWidth(), love.graphics.getHeight()
-
-    if not self.scene then return end
-
-    if self.scenes[self.scene].refreshScreenSize then
-        self.scenes[self.scene]:refreshScreenSize(love.graphics.getWidth(), love.graphics.getHeight())
-    end
 end
 
 -- draws current scene

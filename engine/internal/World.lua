@@ -8,6 +8,7 @@ function world:init(w, h, d)
     self.entities = {}
     self.drawOrder = {}
     self.numEntities = 0
+    self.buffer = love.graphics.newCanvas()
 
     for l = 1, d  do 
         self.entities[l], self.drawOrder[l] = {}, {}
@@ -22,15 +23,8 @@ function world:init(w, h, d)
     -- settings
     self.offsetDiffuse = 1
     self.zoomDiffuse = 1
-    self.aspect = {1, 1}
-    self.aspectTranslation = 0
 
     self.initialized = false
-    
-    self.lightWorld = _Internal.Lighting({
-        ambient = {1, 1, 1},
-        layers = d
-    })
 end
 
 function world:onadd()
@@ -43,42 +37,14 @@ function world:onadd()
     self.initialized = true
 end
 
-function world:setAmbience(r, g, b)
-    self.lightWorld.ambient = {r, g, b}
-end
-
 -- resizes screen
-function world:refreshScreenSize(w, h)
-    local lw = self.lightWorld
-
-    if w / self.lightWorld.w > 1 then
-        self.aspect = {
-            w / self.lightWorld.w,
-            h / self.lightWorld.h
-        }
-
-        self.aspectTranslation = (w - (lw.w * math.min(self.aspect[1], self.aspect[2]))) / 2
-    else
-        self.aspect = {1, 1}
-        self.aspectTranslation = 0
-    end
-
-    self:setScale(self.scale)
-    self.lightWorld:setTranslation(self.aspectTranslation)
-    -- self.lightWorld:refreshScreenSize(w, h)
+function world:adjustScreenSize(w, h)
+    self.buffer = love.graphics.newCanvas(w or love.graphics.getWidth(), h or love.graphics.getHeight())
 end
 
 -- scales world
 function world:setScale(scale)
     self.scale = scale
-    self.lightWorld:setScale(scale + math.min(self.aspect[1], self.aspect[2]) - 1)
-end
-
--- creates a light
-function world:newLight(x, y, z, r, g, b, range)
-    local l = self.lightWorld:newLight(x, y, r, g, b, range)
-    l:setPosition(x, y, z)
-    return l
 end
 
 -- gets entity by id
@@ -114,16 +80,12 @@ end
 
 -- swaps occluder inceces in light world
 function world:swapOccluders(occ1, occ2)
-    local l1, l2 = occ1.layer, occ2.layer
-    local f= io.open("test.txt", "w+")
-    f:write(tostring(l1))
-    f:close()
+    -- local l1, l2 = occ1.layer, occ2.layer
+    -- if l1 ~= l2 then return end
+    -- local lw = self.lightWorld.bodies[l1]
 
-    if l1 ~= l2 then return end
-    local lw = self.lightWorld.bodies[l1]
-
-    lw[occ1.id], lw[occ2.id] = lw[occ2.id], lw[occ1.id]
-    occ1.id, occ2.id = occ2.id, occ1.id
+    -- lw[occ1.id], lw[occ2.id] = lw[occ2.id], lw[occ1.id]
+    -- occ1.id, occ2.id = occ2.id, occ1.id
 end
 
 -- removes entity
@@ -143,13 +105,13 @@ end
 
 -- update world
 function world:update(dt)
-    love.graphics.clear(0, 0, 0, 0)
-
     -- update entities
     for l = 1, self.d do
 
         -- update entities
         for id, ent in pairs(self.entities[l]) do
+
+            -- remove entity
             if ent.remove then 
                 ent:onremove()
                 self.entities[l][id] = nil 
@@ -162,27 +124,22 @@ function world:update(dt)
             ::next::
         end
     end
-
-    self.lightWorld:update(dt)
 end
 
 -- draw world
 function world:draw()
+    love.graphics.push()
+        love.graphics.scale(self.scale)
 
-    love.graphics.translate(self.aspectTranslation, 0)
-
-    love.graphics.scale(math.min(self.aspect[1], self.aspect[2]))
-
-    self.lightWorld:draw(function()
-        love.graphics.clear(0.5, 0.5, 0.5)
-
+        -- pre render entities
         for l = 1, self.d do
             for _, id in pairs(self.drawOrder[l]) do
                 local ent = self.entities[l][id]
                 if ent.draw then ent:draw() end
             end
         end
-    end)
+
+    love.graphics.pop()
 end
 
 return world
