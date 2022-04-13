@@ -1,10 +1,12 @@
 local _PACKAGE = string.gsub(...,"%.","/") or ""
 if string.len(_PACKAGE) > 0 then _PACKAGE = _PACKAGE .. "/" end
 
-local _IMAGEPATH = _IMAGEPATH or "assets"
-local _COMPONENTPATH = _COMPONENTPATH or _PACKAGE .. "components"
-local _UTILITYPATH = _UTILITYPATH or _PACKAGE .. "util"
-local _INTERNALPATH = _INTERNALPATH or _PACKAGE .. "internal"
+_IMAGEPATH = _IMAGEPATH or "assets"
+_COMPONENTPATH = _COMPONENTPATH or _PACKAGE .. "components"
+_UTILITYPATH = _UTILITYPATH or _PACKAGE .. "util"
+_INTERNALPATH = _INTERNALPATH or _PACKAGE .. "internal"
+
+
 
 _Constants = {
     Friction = 0.8,
