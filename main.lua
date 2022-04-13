@@ -17,11 +17,13 @@ world:addEntity(g)
 world:addEntity(f)
 world:addEntity(z)
 
+world:setScale(2)
+
 function love.load()
 end
 
 function love.update(dt)
-    light:setPosition(love.mouse.getX() / world.scale, love.mouse.getY() / world.scale, 1)
+    light:setPosition(love.mouse.getX() / (world.scale + world.aspect), love.mouse.getY() / (world.scale + world.aspect), 1)
 
     if love.keyboard.isDown("w") then e.Body:impulse(100, -1, "y") end
     if love.keyboard.isDown("a") then e.Body:impulse(100, -1, "x") end
@@ -34,5 +36,11 @@ end
 function love.draw()
     stack:draw()
 
-    love.graphics.print(love.timer.getFPS())
+    -- love.graphics.print(love.timer.getFPS())
+end
+
+function love.keyreleased(k)
+    if k == "space" and stack then
+        stack:setFullscreen()
+    end
 end

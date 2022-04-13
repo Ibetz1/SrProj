@@ -76,9 +76,11 @@ function post_shader:drawBloom(canvas, args)
   })
 end
 
-function post_shader:drawBlur(canvas, args)
-  shaders['blurv'][1]:send("steps", args[1] or 0.0)
-  shaders['blurh'][1]:send("steps", args[2] or args[1] or 0.0)
+function post_shader:drawBlur(canvas, strength)
+  shaders['blurv'][1]:send("steps", strength[1] or 0.0)
+  shaders['blurv'][1]:send("res", { love.graphics.getWidth(), love.graphics.getHeight() })
+  shaders['blurh'][1]:send("steps", strength[2] or strength[1] or 0.0)
+  shaders['blurh'][1]:send("res", { love.graphics.getWidth(), love.graphics.getHeight() })
   util.process(canvas, {shader = shaders['blurv'][1], blendmode = "alpha"})
   util.process(canvas, {shader = shaders['blurh'][1], blendmode = "alpha"})
 end

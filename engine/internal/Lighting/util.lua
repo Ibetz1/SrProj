@@ -3,10 +3,11 @@ local tempCanvas
 --TODO: the whole stencil/canvas system should be reviewed since it has been changed in a naive way
 
 function util.process(canvas, options)
-  --TODO: now you cannot draw a canvas to itself
-  if not tempCanvas then
-    tempCanvas = love.graphics.newCanvas()
+  -- --TODO: now you cannot draw a canvas to itself
+  if not tempCanvas or tempCanvas:getWidth() ~= love.graphics.getWidth() then
+    tempCanvas = love.graphics.newCanvas(love.graphics.getWidth(), love.graphics.getHeight())
   end
+  
   util.drawCanvasToCanvas(canvas, tempCanvas, options)
   util.drawCanvasToCanvas(tempCanvas, canvas, options)
 end
@@ -46,7 +47,6 @@ function util.drawCanvasToCanvas(canvas, other_canvas, options)
       love.graphics.setShader()
     end
     if options["stencil"] or options["istencil"] then
-      --love.graphics.setInvertedStencil()
       love.graphics.setStencilTest()
     end
   end)

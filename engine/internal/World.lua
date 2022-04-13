@@ -8,7 +8,6 @@ function world:init(w, h, d)
     self.entities = {}
     self.drawOrder = {}
     self.numEntities = 0
-    self.buffer = love.graphics.newCanvas()
 
     for l = 1, d  do 
         self.entities[l], self.drawOrder[l] = {}, {}
@@ -23,9 +22,10 @@ function world:init(w, h, d)
     -- settings
     self.offsetDiffuse = 1
     self.zoomDiffuse = 1
+    self.aspect = 0
 
     self.initialized = false
-
+    
     self.lightWorld = _Internal.Lighting({
         ambient = {1, 1, 1},
         layers = d
@@ -47,16 +47,21 @@ function world:setAmbience(r, g, b)
 end
 
 -- resizes screen
-function world:adjustScreenSize()
-    self.lightWorld:refreshScreenSize(
-        love.graphics.getWidth(), love.graphics.getHeight()
-    )
+function world:refreshScreenSize(w, h)
+    if w / self.lightWorld.w > 1 then
+        self.aspect = h / self.lightWorld.h
+    else
+        self.aspect = 0 
+    end
+
+    self:setScale(self.scale)
+    self.lightWorld:refreshScreenSize()
 end
 
 -- scales world
 function world:setScale(scale)
     self.scale = scale
-    self.lightWorld:setScale(2)
+    self.lightWorld:setScale(scale + self.aspect)
 end
 
 -- creates a light
@@ -124,14 +129,6 @@ end
 
 -- update world
 function world:update(dt)
-
-    self.lightWorld:update(dt)
-
-    self.activeLayers = {}
-
-    self.activeLayers = {}
-
-    love.graphics.setCanvas(self.buffer)
     love.graphics.clear(0, 0, 0, 0)
 
     -- update entities
@@ -151,23 +148,15 @@ function world:update(dt)
 
             ::next::
         end
-
-        -- pre render entities
-        for _, id in pairs(self.drawOrder[l]) do
-            local ent = self.entities[l][id]
-            if ent.draw then ent:draw() end
-        end
     end
-
-    self.lightWorld:update(dt)
-    love.graphics.setCanvas()
 
     self.lightWorld:update(dt)
 end
 
 -- draw world
 function world:draw()
-    self.lightWorld:draw(function() 
+
+    self.lightWorld:draw(function()
         love.graphics.clear(0.5, 0.5, 0.5)
 
         for l = 1, self.d do
@@ -176,12 +165,9 @@ function world:draw()
                 if ent.draw then ent:draw() end
             end
         end
-
-        love.graphics.draw(self.buffer)
-
     end)
 
-                
+    love.graphics.print(self.buffer:getWidth())
 end
 
 return world

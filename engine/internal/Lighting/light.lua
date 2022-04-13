@@ -128,7 +128,7 @@ end
 
 function light:inRange(l,t,w,h,s)
   local lx, ly, rs = (self.x + l/s) * s, (self.y + t/s) * s, self.range * s
-  return self.visible and (lx + rs) > 0 and (lx - rs) < w/s and (ly + rs) > 0 and (ly - rs) < h/s
+  return self.visible and (lx + rs) > 0 and (lx - rs) < w and (ly + rs) > 0 and (ly - rs) < h
 end
 
 function light:setVisible(visible)

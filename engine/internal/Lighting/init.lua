@@ -115,8 +115,6 @@ function light_world:update(dt)
 end
 
 function light_world:draw(cb)
-  self.post_shader:drawWith(self.render_buffer, self.l, self.t, self.s)
-
   util.drawto(self.render_buffer, self.l, self.t, self.s, false, function()
     cb(self.l, self.t, self.w, self.h, self.s)
 
@@ -128,8 +126,6 @@ function light_world:draw(cb)
   end)
 
   self.post_shader:drawWith(self.render_buffer, self.l, self.t, self.s)
-
-  love.graphics.draw(self.render_buffer)
 end
 
 -- draw normal shading
@@ -199,7 +195,6 @@ function light_world:drawShadows(l, t, w, h, s)
     self.shadowShader:send("lightGlow", {1.0 - light.glowSize, light.glowStrength})
 
     self.shadowShader:send("lightGlow", { 1.0 - light.glowSize, light.glowStrength })
-    -- self.shadowShader:send("scale", self.s)
 
     self.shadowShader:send("lightGlow", { 1.0 - light.glowSize, light.glowStrength })
 
