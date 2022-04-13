@@ -22,7 +22,8 @@ function world:init(w, h, d)
     -- settings
     self.offsetDiffuse = 1
     self.zoomDiffuse = 1
-    self.aspect = 0
+    self.aspect = {1, 1}
+    self.aspectTranslation = 0
 
     self.initialized = false
     
@@ -48,20 +49,29 @@ end
 
 -- resizes screen
 function world:refreshScreenSize(w, h)
+    local lw = self.lightWorld
+
     if w / self.lightWorld.w > 1 then
-        self.aspect = h / self.lightWorld.h
+        self.aspect = {
+            w / self.lightWorld.w,
+            h / self.lightWorld.h
+        }
+
+        self.aspectTranslation = (w - (lw.w * math.min(self.aspect[1], self.aspect[2]))) / 2
     else
-        self.aspect = 0 
+        self.aspect = {1, 1}
+        self.aspectTranslation = 0
     end
 
     self:setScale(self.scale)
-    self.lightWorld:refreshScreenSize()
+    self.lightWorld:setTranslation(self.aspectTranslation)
+    -- self.lightWorld:refreshScreenSize(w, h)
 end
 
 -- scales world
 function world:setScale(scale)
     self.scale = scale
-    self.lightWorld:setScale(scale + self.aspect)
+    self.lightWorld:setScale(scale + math.min(self.aspect[1], self.aspect[2]) - 1)
 end
 
 -- creates a light
@@ -105,6 +115,10 @@ end
 -- swaps occluder inceces in light world
 function world:swapOccluders(occ1, occ2)
     local l1, l2 = occ1.layer, occ2.layer
+    local f= io.open("test.txt", "w+")
+    f:write(tostring(l1))
+    f:close()
+
     if l1 ~= l2 then return end
     local lw = self.lightWorld.bodies[l1]
 
@@ -136,7 +150,6 @@ function world:update(dt)
 
         -- update entities
         for id, ent in pairs(self.entities[l]) do
-
             if ent.remove then 
                 ent:onremove()
                 self.entities[l][id] = nil 
@@ -156,6 +169,10 @@ end
 -- draw world
 function world:draw()
 
+    love.graphics.translate(self.aspectTranslation, 0)
+
+    love.graphics.scale(math.min(self.aspect[1], self.aspect[2]))
+
     self.lightWorld:draw(function()
         love.graphics.clear(0.5, 0.5, 0.5)
 
@@ -166,8 +183,6 @@ function world:draw()
             end
         end
     end)
-
-    love.graphics.print(self.buffer:getWidth())
 end
 
 return world

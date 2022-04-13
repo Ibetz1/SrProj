@@ -1,13 +1,12 @@
 local util = {}
-local tempCanvas
+local tempCanvas = love.graphics.newCanvas()
 --TODO: the whole stencil/canvas system should be reviewed since it has been changed in a naive way
 
 function util.process(canvas, options)
-  -- --TODO: now you cannot draw a canvas to itself
-  if not tempCanvas or tempCanvas:getWidth() ~= love.graphics.getWidth() then
-    tempCanvas = love.graphics.newCanvas(love.graphics.getWidth(), love.graphics.getHeight())
+  if tempCanvas:getWidth() ~= love.graphics.getWidth() then
+    -- tempCanvas = love.graphics.newCanvas()
   end
-  
+
   util.drawCanvasToCanvas(canvas, tempCanvas, options)
   util.drawCanvasToCanvas(tempCanvas, canvas, options)
 end
@@ -15,7 +14,7 @@ end
 function util.drawCanvasToCanvas(canvas, other_canvas, options)
   options = options or {}
 
-  util.drawto(other_canvas, 0, 0, 1, options['stencil'] or options['istencil'] and true or false, function()
+  util.drawto(other_canvas, 0, 0, options['scale'] or 1, options['stencil'] or options['istencil'] and true or false, function()
     if options["blendmode"] == 'multiply' then
       love.graphics.setBlendMode(options["blendmode"], 'premultiplied')
     elseif options["blendmode"] then
@@ -54,11 +53,16 @@ end
 
 function util.drawto(canvas, x, y, scale, stencil, cb)
   local last_buffer = love.graphics.getCanvas()
+  local sx, sy = scale, scale
+  if type(scale) == "table" then
+    sx, sy = scale[1], scale[2]
+  end
+
   love.graphics.push()
     love.graphics.origin()
       love.graphics.setCanvas({ canvas, stencil = stencil })
       love.graphics.translate(x, y)
-      love.graphics.scale(scale)
+      love.graphics.scale(sx, sy)
       cb()
     love.graphics.setCanvas(last_buffer)
   love.graphics.pop()

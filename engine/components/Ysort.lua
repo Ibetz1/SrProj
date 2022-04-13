@@ -34,9 +34,8 @@ function comp:update(dt)
             if not occ1 or not occ2 then goto next end
 
             local id1, id2 = occ1.body.id, occ2.body.id
-        
-            if id2 > id1 then
-
+            
+            if id1 < id2 then
                 world:swapOccluders(occ1.body, occ2.body)
             end
 

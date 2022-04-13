@@ -115,21 +115,20 @@ function light_world:update(dt)
 end
 
 function light_world:draw(cb)
-  util.drawto(self.render_buffer, self.l, self.t, self.s, false, function()
+  love.graphics.setCanvas(self.render_buffer)
     cb(self.l, self.t, self.w, self.h, self.s)
 
     _ = self.disableMaterial or self:drawMaterial(self.l, self.t, self.w, self.h, self.s)
     self:drawShadows(self.l, self.t, self.w, self.h, self.s)
     _ = self.disableGlow or self:drawGlow(self.l, self.t, self.w, self.h, self.s)
-    _ = self.disableRefraction or self:drawRefraction(self.l, self.t, self.w, self.h, self.s)
-    _ = self.disableReflection or self:drawReflection(self.l, self.t, self.w, self.h, self.s)
-  end)
 
-  self.post_shader:drawWith(self.render_buffer, self.l, self.t, self.s)
+  love.graphics.setCanvas()
+
+  love.graphics.draw(self.render_buffer)
 end
 
 -- draw normal shading
-function light_world:drawShadows(l, t, w, h, s)
+function light_world:drawShadows(l, t, w, h, s, aspect)
   love.graphics.setCanvas(self.normalMap)
   love.graphics.clear()
   love.graphics.setCanvas()
