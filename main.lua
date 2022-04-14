@@ -3,35 +3,41 @@ require("engine")
 local game = require("game")
 local stack, world, index = game(16, 16, 1)
 
--- love.window.setVSync(0)
+-- local e = game.entities:block(100, 100, 32, 24, _Assets.machine)
+-- local g = game.entities:block(100, 100, 32, 24, _Assets.machine)
+-- local f = game.entities:block(100, 100, 32, 24, _Assets.machine)
+-- local z = game.entities:block(100, 100, 32, 24, _Assets.machine)
 
-local e = game.entities:block(100, 100, 32, 24, _Assets.machine)
-local g = game.entities:block(100, 100, 32, 24, _Assets.machine)
-local f = game.entities:block(100, 100, 32, 24, _Assets.machine)
-local z = game.entities:block(100, 100, 32, 24, _Assets.machine)
+-- world:addEntity(e)
+-- world:addEntity(g)
+-- world:addEntity(f)
+-- world:addEntity(z)
 
-world:addEntity(e)
-world:addEntity(g)
-world:addEntity(f)
-world:addEntity(z)
+-- world:setScale(2)
 
-world:setScale(2)
+local lw = _Lighting.LightWorld:new()
+lw:SetColor(255, 0, 0)
+
+local body = _Lighting.Body:new(lw)
+
 
 function love.load()
 end
 
 function love.update(dt)
-    if love.keyboard.isDown("w") then e.Body:impulse(100, -1, "y") end
-    if love.keyboard.isDown("a") then e.Body:impulse(100, -1, "x") end
-    if love.keyboard.isDown("s") then e.Body:impulse(100, 1, "y") end
-    if love.keyboard.isDown("d") then e.Body:impulse(100, 1, "x") end
+    -- _ = not (love.keyboard.isDown("w")) or e.Body:impulse(100, -1, "y")
+    -- _ = not (love.keyboard.isDown("a")) or e.Body:impulse(100, -1, "x")
+    -- _ = not (love.keyboard.isDown("s")) or e.Body:impulse(100, 1, "y")
+    -- _ = not (love.keyboard.isDown("d")) or e.Body:impulse(100, 1, "x")
 
-    stack:update(dt)
+    -- stack:update(dt)
+    lw:Update()
 end
 
 function love.draw()
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
 
-    stack:draw()
-
-    love.graphics.print(love.timer.getFPS())
+    lw:Draw()
+    -- stack:draw()
 end

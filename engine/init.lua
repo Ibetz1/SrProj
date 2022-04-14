@@ -1,11 +1,11 @@
 local _PACKAGE = string.gsub(...,"%.","/") or ""
 if string.len(_PACKAGE) > 0 then _PACKAGE = _PACKAGE .. "/" end
 
-_IMAGEPATH = _IMAGEPATH or "assets"
-_COMPONENTPATH = _COMPONENTPATH or _PACKAGE .. "components"
-_UTILITYPATH = _UTILITYPATH or _PACKAGE .. "util"
-_INTERNALPATH = _INTERNALPATH or _PACKAGE .. "internal"
-
+_IMAGEPATH          = _IMAGEPATH or "assets"
+_COMPONENTPATH      = _COMPONENTPATH or _PACKAGE .. "components"
+_UTILITYPATH        = _UTILITYPATH or _PACKAGE .. "util"
+_INTERNALPATH       = _INTERNALPATH or _PACKAGE .. "internal"
+_LIGHTINGPATH       = _LIGHTINGPATH or _PACKAGE .. "lighting"
 
 
 _Constants = {
@@ -35,9 +35,10 @@ end
 
 
 -- import internals
-_Util = importDir(_UTILITYPATH, ".lua")
-_Internal = importDir(_INTERNALPATH, ".lua", true)
+_Util       = importDir(_UTILITYPATH, ".lua")
+_Internal   = importDir(_INTERNALPATH, ".lua", true)
 _Components = importDir(_COMPONENTPATH, ".lua")
+_Lighting   = require(_LIGHTINGPATH)
 
 -- import assets
 _Assets = {}
