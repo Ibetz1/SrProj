@@ -20,13 +20,17 @@ _Res = {
 }
 
 -- imports directory
-local function importDir(path, sub, ignore)
-    local content = love.filesystem.getDirectoryItems(path)
+local function importDir(settings)
+    local content = love.filesystem.getDirectoryItems(settings["path"])
     local t = {}
     for _, c in pairs(content) do
-        local name = c:gsub(sub, "")
-        if string.match(c, sub) or ignore then
-            t[name] = require(path .. "/" .. name)
+        local name = c:gsub(settings["sub"], "")
+        if string.match(c, settings["sub"]) or settings["ignore"] then
+            local dir = require(settings["path"] .. "/" .. name)
+            t[name] = dir
+
+            if settings["global"] then _G[name] = dir end
+
         end
     end
 
@@ -35,10 +39,10 @@ end
 
 
 -- import internals
-_Util       = importDir(_UTILITYPATH, ".lua")
-_Internal   = importDir(_INTERNALPATH, ".lua", true)
-_Components = importDir(_COMPONENTPATH, ".lua")
-_Lighting   = require(_LIGHTINGPATH)
+_Util       = importDir {path = _UTILITYPATH, sub = ".lua", global = true}
+_Internal   = importDir {path = _INTERNALPATH, sub = ".lua", ignore = true}
+_Components = importDir {path = _COMPONENTPATH, sub = ".lua", global = true}
+
 
 -- import assets
 _Assets = {}

@@ -1,4 +1,4 @@
-local comp = _Util.Object:new({
+local comp = Object:new({
     embed = true,
     name = "Body",
     type = "physicsBody",
@@ -12,13 +12,13 @@ function comp:init(x, y, w, h, properties)
     self.moving = false
     self.remove = false
 
-    self.position = _Util.Vector(x, y)
-    self.velocity = _Util.Vector()
-    self.direction = _Util.Vector()
-    self.accellaration = _Util.Vector()
+    self.position = Vector(x, y)
+    self.velocity = Vector()
+    self.direction = Vector()
+    self.accellaration = Vector()
 
-    self.gridPosition = _Util.Vector()
-    self.positionOffset = _Util.Vector()
+    self.gridPosition = Vector()
+    self.positionOffset = Vector()
 
     self.properties = {
         mass = 1,

@@ -3,41 +3,29 @@ require("engine")
 local game = require("game")
 local stack, world, index = game(16, 16, 1)
 
--- local e = game.entities:block(100, 100, 32, 24, _Assets.machine)
--- local g = game.entities:block(100, 100, 32, 24, _Assets.machine)
--- local f = game.entities:block(100, 100, 32, 24, _Assets.machine)
--- local z = game.entities:block(100, 100, 32, 24, _Assets.machine)
+require("Lighting")
 
--- world:addEntity(e)
--- world:addEntity(g)
--- world:addEntity(f)
--- world:addEntity(z)
+local lw = _Lighting.lightWorld({0.5, 0.5, 0.5})
+local light = _Lighting.light(100, 100, 200, {0.5, 0.5, 1})
+local occluder = _Lighting.occluder(100, 100, 32, 32)
+occluder:setTexture(_Assets.machine)
 
--- world:setScale(2)
+print(tostring(light.position))
 
-local lw = _Lighting.LightWorld:new()
-lw:SetColor(255, 0, 0)
-
-local body = _Lighting.Body:new(lw)
-
+lw:addLight(light)
 
 function love.load()
 end
 
 function love.update(dt)
-    -- _ = not (love.keyboard.isDown("w")) or e.Body:impulse(100, -1, "y")
-    -- _ = not (love.keyboard.isDown("a")) or e.Body:impulse(100, -1, "x")
-    -- _ = not (love.keyboard.isDown("s")) or e.Body:impulse(100, 1, "y")
-    -- _ = not (love.keyboard.isDown("d")) or e.Body:impulse(100, 1, "x")
+    light:setPosition(love.mouse.getPosition())
 
-    -- stack:update(dt)
-    lw:Update()
+    lw:update()
 end
 
 function love.draw()
-    love.graphics.setColor(1, 1, 1)
-    love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
+    lw:draw()
 
-    lw:Draw()
-    -- stack:draw()
+    love.graphics.rectangle("fill", occluder.position.x, occluder.position.y, occluder.w, occluder.h)
+    occluder:renderShadow(light.position.x, light.position.y, 300)
 end

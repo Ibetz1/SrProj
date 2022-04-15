@@ -1,4 +1,4 @@
-local comp = _Util.Object:new({
+local comp = Object:new({
     embed = true,
     name = "texture",
     type = "texture",

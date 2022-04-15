@@ -1,6 +1,6 @@
 local ceil, floor = math.ceil, math.floor
 
-local comp = _Util.Object:new({
+local comp = Object:new({
     name = "physicsGridUpdater",
     type = "gridUpdater",
     embed = true,

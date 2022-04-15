@@ -7,12 +7,14 @@
     "Lua.diagnostics.disable": [
         "redundant-parameter",
         "different-requires",
-        "undefined-field"
+        "undefined-field",
+        "undefined-global"
     ],
     "Lua.diagnostics.globals": [
         "_INTERNALPATH",
         "_UTILITYPATH",
         "_COMPONENTPATH",
-        "_IMAGEPATH"
+        "_IMAGEPATH",
+        "Vector"
     ]
 }

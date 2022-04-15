@@ -1,4 +1,4 @@
-local scene = _Util.Object:new()
+local scene = Object:new()
 
 function scene:init(...)
     self.layers = {...}

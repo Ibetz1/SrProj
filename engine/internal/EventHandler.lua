@@ -1,4 +1,4 @@
-local eventHandler = _Util.Object:new()
+local eventHandler = Object:new()
 
 function eventHandler:init()
     self.events = {}
@@ -8,7 +8,7 @@ end
 function eventHandler:newEvent(name, f)
     self.events[name] = {
         active = false,
-        id = _Util.UUID(),
+        id = UUID(),
         f = f,
         params = {}
     }

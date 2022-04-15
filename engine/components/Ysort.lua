@@ -1,4 +1,4 @@
-local comp = _Util.Object:new({
+local comp = Object:new({
     embed = false,
     type = "Ysort",
     name = "Ysorter",

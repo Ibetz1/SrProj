@@ -1,4 +1,4 @@
-local comp = _Util.Object:new({
+local comp = Object:new({
     embed = true,
     name = "Body",
     type = "worldBody",
@@ -11,8 +11,8 @@ local comp = _Util.Object:new({
 function comp:init(x, y, w, h)
     self.remove = false
 
-    self.position = _Util.Vector(x, y)
-    self.gridPosition = _Util.Vector()
+    self.position = Vector(x, y)
+    self.gridPosition = Vector(x, y)
     self.w, self.h = w or 0, h or 0
 end
 

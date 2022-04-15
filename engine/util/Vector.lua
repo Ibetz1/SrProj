@@ -193,18 +193,17 @@ function vec2:rotate(angle)
 end
 
 -- custom unpack functionality
-function vec2:unpack(a)
-    return a.x, a.y
+function vec2:unpack()
+    return self.x, self.y
 end
 
 -- creates a new vector
 function vec2:__call(x, y)
-    return setmetatable({x = x or 0, y = y or 0}, vec2)
+    return setmetatable({x = x or 0, y = y or 0}, self)
 end
 
 -- meta data
 vec2.__index = vec2
-
 setmetatable(vec2, vec2)
 
 return vec2

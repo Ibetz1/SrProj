@@ -1,7 +1,7 @@
-local entity = _Util.Object:new()
+local entity = Object:new()
 
 function entity:init()
-    self.id = _Util.UUID()
+    self.id = UUID()
     self.remove = false
     self.layer = 1
     self.world = nil

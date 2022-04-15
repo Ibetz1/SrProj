@@ -4,7 +4,7 @@ Shadows = require("shadows")
 
 Shadows.BlurShader = love.graphics.newShader[[
 	// Size of the canvas on which the effect is applied
-	extern vec2 Size;
+	extern Vector Size;
 	
 	// Multiplier to the size factor (how far is the effect applied? 100% by default)
 	const float Quality = 1.0;
@@ -12,16 +12,16 @@ Shadows.BlurShader = love.graphics.newShader[[
 	// The radius of the pixels that are analized
 	const float Radius = 2.0;
 	
-	vec4 effect(vec4 color, Image tex, vec2 tc, vec2 pc) {
+	vec4 effect(vec4 color, Image tex, Vector tc, Vector pc) {
 		
 		vec4 Sum = vec4(0);
-		vec2 SizeFactor = vec2(Quality / Size);
+		Vector SizeFactor = Vector(Quality / Size);
 		
 		for (float x = -Radius; x <= Radius; x++) {
 			
 			for (float y = -Radius; y <= Radius; y++) {
 				
-				Sum += Texel(tex, tc + vec2(x, y) * SizeFactor);
+				Sum += Texel(tex, tc + Vector(x, y) * SizeFactor);
 				
 			}
 		
@@ -37,19 +37,18 @@ Shadows.BlurShader = love.graphics.newShader[[
 
 Shadows.BloomShader = love.graphics.newShader [[
 	// Size of the canvas
-	extern vec2 Size;
+	extern Vector Size;
 	
 	// Radius of the pixel
 	const float Radius = 1.0;		// pixels per axis; higher = bigger glow, worse performance
 	const float Quality = 5.0;			// lower = smaller glow, better quality
-
-	vec4 effect(vec4 color, Image tex, vec2 tc, vec2 sc) {
+	vec4 effect(vec4 color, Image tex, Vector tc, Vector sc) {
 		
 		// Summatory of the colors
 		vec4 Sum = vec4(0);
 		
 		// Size multiplier (for Texel)
-		vec2 SizeFactor = vec2(Quality / Size);
+		Vector SizeFactor = Vector(Quality / Size);
 		
 		// Number of samples used
 		float Samples = 0.0;
@@ -59,7 +58,7 @@ Shadows.BloomShader = love.graphics.newShader [[
 			for (float y = -Radius; y <= Radius; y++) {
 			
 				// Add every pixel around to the summatory
-				Sum += Texel(tex, tc + vec2(x, y) * SizeFactor);
+				Sum += Texel(tex, tc + Vector(x, y) * SizeFactor);
 				Samples++;
 				
 			}
@@ -74,7 +73,7 @@ Shadows.BloomShader = love.graphics.newShader [[
 
 Shadows.DarkenShader = love.graphics.newShader [[
 	
-	vec4 effect(vec4 src, Image tex, vec2 tc, vec2 sc) {
+	vec4 effect(vec4 src, Image tex, Vector tc, Vector sc) {
 		// Minimum between the color and the texture color
 		return min(src, Texel(tex, tc) );
 		
@@ -86,15 +85,14 @@ Shadows.DarkenShader = love.graphics.newShader [[
 Shadows.AberrationShader = love.graphics.newShader[[
 	
 	// Size of the canvas
-	extern vec2 Size;
+	extern Vector Size;
 	
 	// Offset used for the effect
 	extern float Aberration = 2.0;
-
-	vec4 effect(vec4 col, Image texture, vec2 texturePos, vec2 screenPos){
+	vec4 effect(vec4 col, Image texture, Vector texturePos, Vector screenPos){
 		
 		// Divide the offset by the size of the canvas
-		vec2 offset = vec2(Aberration, 0) / Size;
+		Vector offset = Vector(Aberration, 0) / Size;
 		
 		// Get the textures
 		vec4 red = texture2D(texture, texturePos - offset);
@@ -113,8 +111,7 @@ Shadows.LightShader = love.graphics.newShader [[
 	
 	// Center of the light
 	extern vec3 Center;
-
-	vec4 effect(vec4 Color, Image Texture, vec2 tc, vec2 pc) {
+	vec4 effect(vec4 Color, Image Texture, Vector tc, Vector pc) {
 		
 		// Distance between the screen pixel and the center of the light
 		vec3	Delta		=	vec3(pc, 0.0) - Center;
@@ -137,10 +134,10 @@ Shadows.LightShader = love.graphics.newShader [[
 Shadows.RadialBlurShader = love.graphics.newShader [[
 	
 	// Position at which the blur is applied
-	extern vec2 Position;
+	extern Vector Position;
 	
 	// Size of the canvas
-	extern vec2 Size;
+	extern Vector Size;
 	
 	// Radius of the blur for the whole effect
 	extern float Radius;
@@ -158,7 +155,7 @@ Shadows.RadialBlurShader = love.graphics.newShader [[
 	const int BlurRadius	= 5;
 	
 	// This function calculates gauss
-	float gauss(vec2 vec, float deviation) {
+	float gauss(Vector vec, float deviation) {
 		
 		float deviationSquare = pow(deviation, 2.0);
 		float invDeviationSquare = 0.5 / deviationSquare;
@@ -168,7 +165,7 @@ Shadows.RadialBlurShader = love.graphics.newShader [[
 		
 	}
 	
-	vec4 effect(vec4 Color, Image Texture, vec2 textureCoord, vec2 pixelCoord) {
+	vec4 effect(vec4 Color, Image Texture, Vector textureCoord, Vector pixelCoord) {
 		
 		// Radius
 		float r = length(pixelCoord - Position) / Radius;
@@ -177,7 +174,7 @@ Shadows.RadialBlurShader = love.graphics.newShader [[
 		float Deviation = 1.0 + 12.0 * r * smoothstep(0.0, 1.0, r);
 		
 		// Size multiplier (for Texel)
-		vec2 SizeFactor = vec2(Quality / Size);
+		Vector SizeFactor = Vector(Quality / Size);
 		vec4 Gradient = vec4(0E0);
 		
 		// Radius of the blur
@@ -186,7 +183,7 @@ Shadows.RadialBlurShader = love.graphics.newShader [[
 			for (int y = -BlurRadius; y <= BlurRadius; y++) {
 				
 				// Instantiate the vector once and use it twice
-				vec2 vec = vec2(x, y);
+				Vector vec = Vector(x, y);
 				
 				// Get the pixel color at the give position, multiply it by the gauss value
 				Gradient += Texel( Texture, textureCoord + vec * SizeFactor ) * gauss(vec, Deviation);
@@ -205,7 +202,7 @@ Shadows.RadialBlurShader = love.graphics.newShader [[
 Shadows.ShapeShader = love.graphics.newShader [[
 	
 	// Effect that renders the shape of a image
-	vec4 effect(vec4 Color, Image Texture, vec2 textureCoord, vec2 pixelCoord) {
+	vec4 effect(vec4 Color, Image Texture, Vector textureCoord, Vector pixelCoord) {
 		
 		// Get the pixel color at the given texture
 		vec4 pixel = Texel(Texture, textureCoord);
@@ -236,7 +233,7 @@ Shadows.NormalShader = love.graphics.newShader [[
 	// Position of the light
 	extern vec3 LightPos;
 	
-	vec4 effect(vec4 Color, Image Texture, vec2 textureCoord, vec2 pixelCoord) {
+	vec4 effect(vec4 Color, Image Texture, Vector textureCoord, Vector pixelCoord) {
 		
 		// Color of the pixel (the normal)
 		vec4 NormalMap = Texel(Texture, textureCoord);
@@ -270,18 +267,18 @@ Shadows.HeightShader = love.graphics.newShader [[
 	extern vec3 MapPos;
 	
 	// Size of the canvas
-	extern vec2 Size;
+	extern Vector Size;
 	
 	// Height map texture
 	extern Image Texture;
 	
-	vec4 effect(vec4 Color, Image tex, vec2 tc, vec2 pixelCoord) {
+	vec4 effect(vec4 Color, Image tex, Vector tc, Vector pixelCoord) {
 		
 		// Size factor
-		vec2 inverseSize = 1.0 / Size;
+		Vector inverseSize = 1.0 / Size;
 		
 		// Calculating moved 'tc'
-		vec2 textureCoord = ( LightPos.xy - LightCenter.xy + pixelCoord - MapPos.xy ) / Size;
+		Vector textureCoord = ( LightPos.xy - LightCenter.xy + pixelCoord - MapPos.xy ) / Size;
 		
 		// Height on the height map at this point
 		float pointHeight = Texel(Texture, textureCoord).r;
@@ -299,7 +296,7 @@ Shadows.HeightShader = love.graphics.newShader [[
 		for (float i = 0.0; i < Distance; i++) {
 			
 			// Calculate every point within
-			vec2 position = textureCoord + L.xy * i / Size;
+			Vector position = textureCoord + L.xy * i / Size;
 			
 			// If it's within the canvas
 			if ( position.x > 0.0 && position.y > 0.0 && position.x < 1.0 && position.y < 1.0 ) {
@@ -335,18 +332,16 @@ Shadows.DropShadows = love.graphics.newShader [[
 	extern vec3	lightPosition;
 	extern number	lightRadius;
 	extern number	lightRadiusMult;
-
 	extern Image	texure;
-	extern vec2	textureSize;
+	extern Vector	textureSize;
 	extern number	textureZ;
-
-	vec4 effect(vec4 color, Image _t, vec2 texture_coords, vec2 screen_coords) {
+	vec4 effect(vec4 color, Image _t, Vector texture_coords, Vector screen_coords) {
 		// Calculate offset on canvas
 		number	scale		= lightPosition.z / ( lightPosition.z - textureZ );
 		number	textureOffset	= ( scale - 1.0 ) * 0.5;
 		
 		// Inverse of the texture size
-		vec2	iTextureSize	= 1.0 / textureSize;
+		Vector	iTextureSize	= 1.0 / textureSize;
 		
 		// Position of the pixel
 		vec3	textureCoord3	= vec3(screen_coords * iTextureSize, 0.0);
@@ -362,7 +357,7 @@ Shadows.DropShadows = love.graphics.newShader [[
 		for (number x = -lightRadius; x < lightRadius; x++) {
 			for (number y = -lightRadius; y < lightRadius; y++) {
 				
-				vec2	vec		= vec2(x, y);
+				Vector	vec		= Vector(x, y);
 				number	vecLength	= length(vec);
 				
 				if ( vecLength <= lightRadius ) {
@@ -395,5 +390,3 @@ Shadows.DropShadows = love.graphics.newShader [[
 		
 	}
 ]]
-
-return Shadows

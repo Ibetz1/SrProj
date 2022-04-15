@@ -1,4 +1,4 @@
-local stack = _Util.Object:new()
+local stack = Object:new()
 
 function stack:init()
     self.scenes = {}

@@ -1,8 +1,8 @@
-local world = _Util.Object:new()
+local world = Object:new()
 
 function world:init(w, h, d)
     self.w, self.h, self.d = w, h, d
-    self.physicsGrid = _Util.Array3D(w, h, d)
+    self.physicsGrid = Array3D(w, h, d)
 
     -- entity pointers
     self.entities = {}
@@ -17,8 +17,8 @@ function world:init(w, h, d)
     self.scale = 1
     self.currentScale = 1
 
-    self.offset = _Util.Vector(0, 0)
-    self.currentOffset = _Util.Vector(0, 0)
+    self.offset = Vector()
+    self.currentOffset = Vector()
 
     -- settings
     self.offsetDiffuse = 1
