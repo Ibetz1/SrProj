@@ -8,7 +8,6 @@ function light:init(x, y, range, color)
 end
 
 function light:update(dt)
-
     -- pass info onto shader
     _Shaders.light:send("Radius", self.range)
     _Shaders.light:send("Position", {self.position.x, self.position.y, self.position.z})
@@ -37,12 +36,6 @@ end
 -- sets world
 function light:setWorld(w) 
     self.world = w
-end
-
--- adds light to world
-function light:addToWorld(w)
-    self.world = w
-    w:addLight(self)
 end
 
 return light

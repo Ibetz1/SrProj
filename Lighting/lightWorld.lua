@@ -30,6 +30,7 @@ function world:setBuffers(w, h)
 
 
     self.drawBuffer =      love.graphics.newCanvas(w, h)
+    self.texBuffer =       love.graphics.newCanvas(w, h)
     self.lightingBuffer =  love.graphics.newCanvas(w, h)
     self.shadowBuffer =    love.graphics.newCanvas(w, h)
     self.normalBuffer =    love.graphics.newCanvas(w, h)
@@ -39,7 +40,7 @@ end
 -- draws lights
 function world:renderLights(dt)
     love.graphics.setCanvas(self.lightingBuffer)
-        love.graphics.clear()
+        love.graphics.clear(unpack(self.ambience))
         love.graphics.origin()
 
         -- render each light
@@ -47,12 +48,52 @@ function world:renderLights(dt)
             self.lights[i]:update(dt)
             self.lights[i]:draw()
         end
+
+        love.graphics.setBlendMode("subtract")
+
+        love.graphics.draw(self.shadowBuffer)
+    
+        love.graphics.setBlendMode("alpha")
         
     love.graphics.setCanvas()
 end
 
 function world:renderShadows()
+    love.graphics.setCanvas(self.shadowBuffer)
+        love.graphics.clear()
+        love.graphics.origin()
 
+        for i = 1, #self.lights do
+            local light = self.lights[i]
+
+            for o = 1, #self.occluders do
+
+                local occluder = self.occluders[i]
+                local px, py = light.position:unpack()
+
+                -- render shadow
+                if occluder:inRange(px, py, light.range) then
+
+                    occluder:renderShadow(px, py, light.range)
+
+                end
+            end
+        end
+
+    love.graphics.setCanvas()
+end
+
+function world:renderTextures()
+    love.graphics.setCanvas(self.texBuffer)
+    love.graphics.clear()
+
+    for i = 1, #self.occluders do
+        local occluder = self.occluders[i]
+
+        occluder:drawTexture()
+    end
+
+    love.graphics.setCanvas()
 end
 
 function world:renderNormals()
@@ -64,25 +105,22 @@ end
 
 -- updates world
 function world:update(dt)
+    self:renderTextures()
     self:renderLights()
     self:renderShadows()
     self:renderNormals()
     self:renderGlow()
 
-    love.graphics.setCanvas({self.drawBuffer, stencil = true})
+    love.graphics.setCanvas(self.drawBuffer)
 
-        love.graphics.clear(unpack(self.ambience))
         love.graphics.origin()
+        love.graphics.clear()
 
         -- stack buffers
 
         love.graphics.scale(self.scale.x, self.scale.y)
 
-        love.graphics.setBlendMode("add")
-
         love.graphics.draw(self.lightingBuffer)
-
-        love.graphics.setBlendMode("alpha")
 
     love.graphics.setCanvas()
 
@@ -97,7 +135,13 @@ function world:draw()
     love.graphics.scale(1 / self.resolutionScaling)
     love.graphics.translate(self.translation:unpack())
 
+    -- love.graphics.draw(self.texBuffer)
+
+    -- love.graphics.setBlendMode("multiply", "premultiplied")
+
     love.graphics.draw(self.drawBuffer)
+
+    -- love.graphics.setBlendMode("alpha")
 
     love.graphics.pop()
 end
@@ -116,5 +160,15 @@ function world:addLight(light)
 end
 
 function world:removeLight(index) table.remove(self.lights, index) end
+
+-- world occluders
+function world:addOccluder(occluder)
+    table.insert(self.occluders, occluder)
+    occluder:setWorld(self)
+
+    return #self.occluders
+end
+
+function world:removeOccluder(index) table.remove(self.occluders, index) end
 
 return world

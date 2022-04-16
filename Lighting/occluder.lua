@@ -20,6 +20,7 @@ function occluder:init(x, y, w, h, settings)
     self.mesh = love.graphics.newMesh(self.matrix, "strip")
 end
 
+-- defines shadow transform
 function occluder:defineShadowTransform(lx, ly, l)
     local cx, cy = self.position.x + self.w / 2, self.position.y + self.h / 2
     local dx, dy = lx - cx, ly - cy
@@ -49,8 +50,8 @@ function occluder:defineShadowTransform(lx, ly, l)
     end
 end
 
+-- renders shadow
 function occluder:renderShadow(lx, ly, length)
-
     -- define transform matrix
     if not aabb(self.position.x, self.position.y, self.w, self.h, lx, ly, 0, 0) then
         
@@ -61,13 +62,18 @@ function occluder:renderShadow(lx, ly, length)
     -- apply matrix to mesh
     self.mesh:setVertices(self.shadowMatrix)
 
+    love.graphics.rectangle("fill", self.position.x, self.position.y, self.w, self.h)
     love.graphics.draw(self.mesh, self.position.x, self.position.y)
 end
 
+-- draws texture
 function occluder:drawTexture()
     if not self.texture then return end
+
+    love.graphics.draw(self.texture, self.position.x, self.position.y)
 end
 
+-- sets texture
 function occluder:setTexture(tex, resize)
     self.texture = tex
 
@@ -77,6 +83,12 @@ function occluder:setTexture(tex, resize)
     end
 end
 
+-- sets normal
+function occluder:setNormal(normal)
+    self.normal = normal
+end
+
+-- resizes matrices
 function occluder:sizeMatrix(w, h)
     self.matrix = Matrix {
         {0, 0}, 
@@ -88,6 +100,24 @@ function occluder:sizeMatrix(w, h)
     self.shadowMatrix = Matrix {
         {0, 0}, {0, 0}, {0, 0}, {0, 0}
     }
+end
+
+-- checks if light in range
+function occluder:inRange(lx, ly, d)
+    local dsq = d * d
+    for i = 1, #self.matrix do
+        local px, py = self.matrix[i][1] + self.position.x, self.matrix[i][2] + self.position.y
+        local dx, dy = px - lx, py - ly
+
+        if dx * dx + dy * dy < dsq then return true end
+    end
+
+    return false
+end
+
+-- sets world
+function occluder:setWorld(world)
+    self.world = world
 end
 
 return occluder
