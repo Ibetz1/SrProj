@@ -19,11 +19,13 @@ function occluder:init(x, y, w, h, settings)
 end
 
 -- renders shadow
-function occluder:renderShadow(lx, ly, length)
+function occluder:renderShadow(lx, ly, lz, length, ox, oy)
 
     if aabb(lx, ly, 0, 0, self.position.x, self.position.y, self.w, self.h) then
         return
     end
+
+    -- love.graphics.setColor(0, 0, 0)
 
     -- render poly shadows
     for i = 1, #self.matrix do
@@ -38,15 +40,8 @@ function occluder:renderShadow(lx, ly, length)
         local x3, y3 = math.cos(t2) * -2 * length + self.position.x, math.sin(t2) * -2 * length + self.position.y
         local x4, y4 = math.cos(t1) * -2 * length + self.position.x, math.sin(t1) * -2 * length + self.position.y
 
-        love.graphics.polygon("fill", x1, y1, x2, y2, x3, y3, x4, y4)
-
+        love.graphics.polygon("fill", x1 + ox, y1 + oy, x2 + ox, y2 + oy, x3 + ox, y3 + oy, x4 + ox, y4 + oy)
     end
-
-    love.graphics.setColor(0, 0, 0)
-
-    self:drawTexture()
-
-    love.graphics.setColor(1, 1, 1)
 end
 
 -- draws texture
@@ -92,6 +87,21 @@ function occluder:inRange(lx, ly, d)
     end
 
     return false
+end
+
+-- renders normal
+function occluder:renderNormal(x, y, z, ox, oy)
+    if not self.normal then return end
+
+    _Shaders.normal:send("LightPos", {x, y, z})
+    
+    local shader = love.graphics.getShader()
+
+    love.graphics.setShader(_Shaders.normal)
+
+    love.graphics.draw(self.normal, self.position.x + ox, self.position.y + oy)
+
+    love.graphics.setShader(shader)
 end
 
 -- sets world

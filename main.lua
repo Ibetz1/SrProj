@@ -9,9 +9,11 @@ require("Lighting")
 
 local lw = _Lighting.lightWorld({0.2, 0.2, 0.2})
 local light = _Lighting.light(100, 100, 200, {0.5, 0.5, 1})
-local occluder = _Lighting.occluder(100, 100, 32, 48)
+local light1 = _Lighting.light(200, 200, 200, {0, 0.5, 1})
+local occluder = _Lighting.occluder(200, 100, 32, 48)
 
 lw:addLight(light)
+lw:addLight(light1)
 lw:addOccluder(occluder)
 
 occluder:setTexture(_Assets.machine)
@@ -30,4 +32,11 @@ function love.draw()
     lw:draw()
 
     love.graphics.print(love.timer.getFPS())
+end
+
+function love.mouse.ispressed(x, y, b)
+    if b == 1 then
+        local light = _Lighting.light(x, y, 200, {0.5, 0.5, 1})
+        lw:addLight(light)
+    end
 end
