@@ -50,6 +50,8 @@ function world:renderLights(dt)
             light:update(dt)
             light:draw()
 
+            love.graphics.setBlendMode("subtract")
+
             -- render shadows
             for o = 1, #self.occluders do
 
@@ -63,6 +65,8 @@ function world:renderLights(dt)
 
                 end
             end
+
+            love.graphics.setBlendMode("alpha")
         end
 
         love.graphics.setBlendMode("subtract")

@@ -71,7 +71,7 @@ function occluder:setNormal(normal)
     self.normal = normal
 end
 
--- resizes matrices
+-- resizes matrix
 function occluder:sizeMatrix(w, h)
     self.matrix = Matrix {
         {0, 0, w, 0}, 
