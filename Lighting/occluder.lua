@@ -62,8 +62,13 @@ function occluder:renderShadow(lx, ly, length)
     -- apply matrix to mesh
     self.mesh:setVertices(self.shadowMatrix)
 
-    love.graphics.rectangle("fill", self.position.x, self.position.y, self.w, self.h)
     love.graphics.draw(self.mesh, self.position.x, self.position.y)
+
+    love.graphics.setColor(0, 0, 0)
+
+    self:drawTexture()
+
+    love.graphics.setColor(1, 1, 1)
 end
 
 -- draws texture
