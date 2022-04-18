@@ -31,7 +31,6 @@ function world:setBuffers(w, h)
     self.drawBuffer =      love.graphics.newCanvas(w, h)
     self.texBuffer =       love.graphics.newCanvas(w, h)
     self.lightingBuffer =  love.graphics.newCanvas(w, h)
-    self.shadowBuffer =    love.graphics.newCanvas(w, h)
     self.normalBuffer =    love.graphics.newCanvas(w, h)
     self.glowBuffer =      love.graphics.newCanvas(w, h)
 
@@ -46,36 +45,16 @@ function world:renderLights(dt)
 
         -- render each light
         for i = 1, #self.lights do
-            self.lights[i]:update(dt)
-            self.lights[i]:draw()
-        end
-
-        love.graphics.setBlendMode("subtract")
-
-        love.graphics.draw(self.shadowBuffer)
-
-        love.graphics.draw(self.normalBuffer)
-
-        love.graphics.setBlendMode("alpha")
-        
-    love.graphics.setCanvas()
-end
-
--- draw shadows
-function world:renderShadows()
-    love.graphics.setCanvas(self.shadowBuffer)
-        love.graphics.clear()
-        love.graphics.origin()
-
-        for i = 1, #self.lights do
             local light = self.lights[i]
 
+            light:update(dt)
+            light:draw()
+
+            -- render shadows
             for o = 1, #self.occluders do
 
-                local occluder = self.occluders[i]
+                local occluder = self.occluders[o]
                 local px, py = light.position:unpack()
-
-                _Shaders.normal:send("LightPos", {light.position.x, light.position.y, light.position.z})
 
                 -- render shadow
                 if occluder:inRange(px, py, light.range) then
@@ -86,6 +65,12 @@ function world:renderShadows()
             end
         end
 
+        love.graphics.setBlendMode("subtract")
+
+        love.graphics.draw(self.normalBuffer)
+
+        love.graphics.setBlendMode("alpha")
+        
     love.graphics.setCanvas()
 end
 
@@ -133,7 +118,6 @@ end
 function world:update(dt)
     self:renderLights()
     self:renderNormals()
-    self:renderShadows()
     self:renderGlow()
     self:renderTextures()
 
