@@ -10,7 +10,6 @@ require("Lighting")
 local lw = _Lighting.lightWorld({0.2, 0.2, 0.2})
 local light = _Lighting.light(100, 100, 200, {0.5, 0.5, 1})
 local occluder = _Lighting.occluder(100, 100, 32, 48)
-occluder:setTexture(_Assets.machine)
 
 lw:addLight(light)
 lw:addOccluder(occluder)

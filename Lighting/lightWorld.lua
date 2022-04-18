@@ -28,7 +28,6 @@ function world:setBuffers(w, h)
     local w, h = w or love.graphics.getWidth(), h or love.graphics.getHeight()
     w, h = w * self.resolutionScaling, h * self.resolutionScaling
 
-
     self.drawBuffer =      love.graphics.newCanvas(w, h)
     self.texBuffer =       love.graphics.newCanvas(w, h)
     self.lightingBuffer =  love.graphics.newCanvas(w, h)
