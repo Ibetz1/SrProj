@@ -16,53 +16,27 @@ function occluder:init(x, y, w, h, settings)
     end
 
     self:sizeMatrix(w, h)
-
-    self.mesh = love.graphics.newMesh(self.matrix, "strip")
-end
-
--- defines shadow transform
-function occluder:defineShadowTransform(lx, ly, l)
-    local cx, cy = self.position.x + self.w / 2, self.position.y + self.h / 2
-    local dx, dy = lx - cx, ly - cy
-
-    -- y align
-    if (lx > self.position.x and lx < self.position.x + self.w) then
-        _ = (dy < 0) or self.shadowMatrix:map(self.matrix, {3, 4})
-        _ = (dy > 0) or self.shadowMatrix:map(self.matrix, {1, 2})
-    -- x align
-    elseif (ly  > self.position.y and ly < self.position.y + self.w) then
-        _ = (dx < 0) or self.shadowMatrix:map(self.matrix, {2, 3})
-        _ = (dx > 0) or self.shadowMatrix:map(self.matrix, {1, 4})
-    -- diagonal align
-    else
-        _ = (dy / dx < 0) or self.shadowMatrix:map(self.matrix, {2, 4})
-        _ = (dy / dx > 0) or self.shadowMatrix:map(self.matrix, {1, 3})
-    end
-    
-    -- apply shadow transform
-    for i = 2, 1, -1 do
-        local px, py = self.shadowMatrix[i][1], self.shadowMatrix[i][2]
-        local dx, dy = lx - px - self.position.x, ly - py - self.position.y
-        local theta = math.atan2(dx, dy)
-        
-        self.shadowMatrix[i + 2][1] = px - math.sin(theta) * (l or 0)
-        self.shadowMatrix[i + 2][2] = py - math.cos(theta) * (l or 0)
-    end
 end
 
 -- renders shadow
 function occluder:renderShadow(lx, ly, length)
-    -- define transform matrix
-    if not aabb(self.position.x, self.position.y, self.w, self.h, lx, ly, 0, 0) then
-        
-        self:defineShadowTransform(lx, ly, length)
+
+    for i = 1, #self.matrix do
+        local x1, y1, x2, y2 = unpack(self.matrix[i])
+        x1, y1 = x1 + self.position.x, y1 + self.position.y
+        x2, y2 = x2 + self.position.x, y2 + self.position.y
+
+        local d1x, d1y = lx - x1, ly - y1
+        local d2x, d2y = lx - x2, ly - y2
+        local t1, t2 = math.atan2(d1y, d1x), math.atan2(d2y, d2x)
+
+        local x3, y3 = math.cos(t2) * -length + self.position.x, math.sin(t2) * -length + self.position.y
+        local x4, y4 = math.cos(t1) * -length + self.position.x, math.sin(t1) * -length + self.position.y
+
+        love.graphics.polygon("fill", x1, y1, x2, y2, x3, y3, x4, y4)
 
     end
 
-    -- apply matrix to mesh
-    self.mesh:setVertices(self.shadowMatrix)
-
-    love.graphics.draw(self.mesh, self.position.x, self.position.y)
 
     love.graphics.setColor(0, 0, 0)
 
@@ -96,14 +70,10 @@ end
 -- resizes matrices
 function occluder:sizeMatrix(w, h)
     self.matrix = Matrix {
-        {0, 0}, 
-        {w, 0}, 
-        {w, h}, 
-        {0, h}
-    }
-
-    self.shadowMatrix = Matrix {
-        {0, 0}, {0, 0}, {0, 0}, {0, 0}
+        {0, 0, w, 0}, 
+        {0, h, w, h}, 
+        {w, h, 0, h}, 
+        {0, h, 0, 0}
     }
 end
 
