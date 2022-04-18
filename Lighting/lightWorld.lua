@@ -39,7 +39,7 @@ end
 -- draws lights
 function world:renderLights(dt)
     love.graphics.setCanvas(self.lightingBuffer)
-        love.graphics.clear()
+        love.graphics.clear(0, 0, 0)
         love.graphics.origin()
 
         -- render each light
@@ -75,6 +75,10 @@ function world:renderLights(dt)
 
             light:draw()
 
+            love.graphics.setBlendMode("multiply", "premultiplied")
+
+            love.graphics.draw(self.texBuffer)
+        
             love.graphics.setBlendMode("alpha")
 
         end
@@ -113,15 +117,12 @@ function world:update(dt)
 
         love.graphics.scale(self.scale.x, self.scale.y)
 
-        love.graphics.setBlendMode("add")
+        love.graphics.setBlendMode("add", "premultiplied")
 
         love.graphics.draw(self.lightingBuffer)
 
-        love.graphics.setBlendMode("multiply", "premultiplied")
-
-        love.graphics.draw(self.texBuffer)
-    
         love.graphics.setBlendMode("alpha")
+
 
     love.graphics.setCanvas()
 

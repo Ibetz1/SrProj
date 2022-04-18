@@ -14,7 +14,7 @@ vec4 effect(vec4 Color, Image Texture, vec2 tc, vec2 pc) {
     if (Distance <= Radius) {
         
         // Return the 100% of the alpha, minus the distance from the light divided by the radius
-        return vec4( Color.rgb, 1.0 - length( Delta / Radius ) );
+        return vec4( Color.rgb, 1.0 - length( Delta / Radius ));
         
     }
     
