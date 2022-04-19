@@ -5,7 +5,7 @@
 		
 		// Color of the pixel (the normal)
 		vec4 NormalMap = Texel(Texture, textureCoord);
-		vec2 dist = LightPos.xy - pixelCoord.xy;
+		vec2 dist = pixelCoord.xy - LightPos.xy;
 
 		if (NormalMap.rgb == vec3(0, 0, 0)) {
 			discard;
@@ -13,7 +13,7 @@
 
 		// Direction of the light
 		// I don't know why but the formula for the 'y' coordinate seems to solve a issue here
-		vec3 LightDir = vec3( dist, 100 );
+		vec3 LightDir = vec3( dist, 1000 );
 		
 		// Normalize the normal map
 		vec3 N = normalize(NormalMap.rgb * 2.0 - 1.0);

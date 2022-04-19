@@ -7,8 +7,8 @@ love.window.setVSync(0)
 
 require("Lighting")
 
-local lw = _Lighting.lightWorld({0.1, 0.1, 0.3})
-local light = _Lighting.light(100, 100, 200, {0.5, 0.5, 1})
+local lw = _Lighting.lightWorld({0.1, 0.1, 0.1})
+local light = _Lighting.light(100, 100, 200, {1, 0, 0})
 local light1 = _Lighting.light(200, 200, 200, {0, 0.5, 1})
 local occluder = _Lighting.occluder(200, 100, 32, 48)
 

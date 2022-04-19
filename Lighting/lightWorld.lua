@@ -46,42 +46,34 @@ function world:renderLights(dt)
         for i = 1, #self.lights do
             local light = self.lights[i]
 
-            light:update(dt, function()
+            for o = 1, #self.occluders do
+                local occluder = self.occluders[o]
+                local px, py = light.position:unpack()
 
-                -- love.graphics.setBlendMode("subtract")
+                light:updateNormalBuffer(function()
+                    if not occluder:inRange(px, py, light.range) then return end
 
-                for o = 1, #self.occluders do
-                    local occluder = self.occluders[o]
-                    local px, py = light.position:unpack()
+                    occluder:renderNormal(px, py, light.position.z, -px + light.range, -py + light.range)
 
-                    -- render shadows and normals
-                    if occluder:inRange(px, py, light.range) then
+                end)
 
-                        -- love.graphics.setBlendMode("subtract")
+                light:updateShadowBuffer(function()
+                    if not occluder:inRange(px, py, light.range) then return end
 
-                        occluder:renderShadow(px, py, light.position.z, light.range, -px + light.range, -py + light.range)
+                    occluder:renderShadow(px, py, light.position.z, light.range, -px + light.range, -py + light.range)
+                end)
 
-                        love.graphics.setBlendMode("multiply", "premultiplied")
+            end
 
-                        occluder:renderNormal(px, py, light.position.z, -px + light.range, -py + light.range)
+            light:update(dt)
 
-                        love.graphics.setBlendMode("alpha")
-                    end
-                end
-
-            end)
-
-            love.graphics.setBlendMode("screen", "premultiplied")
+            love.graphics.setBlendMode("add", "premultiplied")
 
             light:draw()
 
-            love.graphics.setBlendMode("multiply", "premultiplied")
-
-            love.graphics.draw(self.texBuffer)
-        
             love.graphics.setBlendMode("alpha")
-
         end
+
     love.graphics.setCanvas()
 end
 
@@ -120,9 +112,12 @@ function world:update(dt)
         love.graphics.setBlendMode("add", "premultiplied")
 
         love.graphics.draw(self.lightingBuffer)
+        
+        love.graphics.setBlendMode("multiply", "premultiplied")
 
+        love.graphics.draw(self.texBuffer)
+    
         love.graphics.setBlendMode("alpha")
-
 
     love.graphics.setCanvas()
 
@@ -137,9 +132,9 @@ function world:draw()
     love.graphics.scale(1 / self.resolutionScaling)
     love.graphics.translate(self.translation:unpack())
 
-    love.graphics.draw(self.drawBuffer)
+    -- love.graphics.draw(self.drawBuffer)
 
-    -- love.graphics.draw(self.shadowBuffer)
+    love.graphics.draw(self.drawBuffer)
 
 
     love.graphics.pop()
