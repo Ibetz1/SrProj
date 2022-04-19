@@ -48,6 +48,28 @@ function occluder:renderShadow(lx, ly, lz, length, ox, oy)
     love.graphics.rectangle("fill", self.position.x + ox, self.position.y + oy, self.w, self.h)
 end
 
+-- renders normal
+function occluder:renderNormal(x, y, z, ox, oy)
+    if not self.normal then return end
+
+    _Shaders.normal:send("LightPos", {x, y, z})
+    
+    local shader = love.graphics.getShader()
+
+    love.graphics.setShader(_Shaders.normal)
+
+    love.graphics.draw(self.normal, self.position.x + ox, self.position.y + oy)
+
+    love.graphics.setShader(shader)
+end
+
+-- renders glow
+function occluder:renderGlow()
+    if not self.glow then return end
+
+    love.graphics.draw(self.glow, self.position.x, self.position.y)
+end
+
 -- draws texture
 function occluder:drawTexture()
     if not self.texture then return end
@@ -70,14 +92,9 @@ function occluder:setNormal(normal)
     self.normal = normal
 end
 
--- resizes matrix
-function occluder:sizeMatrix(w, h)
-    self.matrix = Matrix {
-        {0, 0, w, 0}, 
-        {w, 0, w, h}, 
-        {w, h, 0, h}, 
-        {0, h, 0, 0}
-    }
+-- sets glow map
+function occluder:setGlow(glow)
+    self.glow = glow
 end
 
 -- checks if light in range
@@ -91,21 +108,6 @@ function occluder:inRange(lx, ly, d)
     end
 
     return false
-end
-
--- renders normal
-function occluder:renderNormal(x, y, z, ox, oy)
-    if not self.normal then return end
-
-    _Shaders.normal:send("LightPos", {x, y, z})
-    
-    local shader = love.graphics.getShader()
-
-    love.graphics.setShader(_Shaders.normal)
-
-    love.graphics.draw(self.normal, self.position.x + ox, self.position.y + oy)
-
-    love.graphics.setShader(shader)
 end
 
 -- sets world
@@ -127,6 +129,16 @@ end
 function occluder:setSize(w, h)
     self.w, self.h = w, h
     self:sizeMatrix(w, h)
+end
+
+-- resizes matrix
+function occluder:sizeMatrix(w, h)
+    self.matrix = Matrix {
+        {0, 0, w, 0}, 
+        {w, 0, w, h}, 
+        {w, h, 0, h}, 
+        {0, h, 0, 0}
+    }
 end
 
 return occluder

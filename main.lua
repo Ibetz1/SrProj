@@ -18,6 +18,7 @@ lw:addOccluder(occluder)
 
 occluder:setTexture(_Assets.machine)
 occluder:setNormal(_Assets.machine_normal)
+occluder:setGlow(_Assets.machine_glow)
 
 function love.load()
 end
@@ -32,9 +33,9 @@ function love.draw()
     lw:draw()
 
     love.graphics.print(love.timer.getFPS())
+    love.graphics.print(#lw.lights, 0, 12)
 end
-
-function love.mouse.ispressed(x, y, b)
+function love.mousepressed(x, y, b)
     if b == 1 then
         local light = _Lighting.light(x, y, 200, {0.5, 0.5, 1})
         lw:addLight(light)

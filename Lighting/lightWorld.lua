@@ -111,6 +111,15 @@ function world:renderNormals()
 end
 
 function world:renderGlow()
+    love.graphics.setCanvas(self.glowBuffer)
+
+    for o = 1, #self.occluders do
+        local occluder = self.occluders[o]
+
+        occluder:renderGlow()
+    end
+
+    love.graphics.setCanvas()
 end
 
 -- updates world
@@ -129,24 +138,23 @@ function world:update(dt)
 
         love.graphics.scale(self.scale.x, self.scale.y)
 
-
         _Shaders.blur:send("Size", {self.lightingBuffer:getWidth(), self.lightingBuffer:getHeight()})
-
-        love.graphics.setShader(_Shaders.blur)
 
         -- render lighting buffer
         love.graphics.setBlendMode("add")
 
-        love.graphics.draw(self.lightingBuffer)
-    
-        love.graphics.setShader()
+            love.graphics.setShader(_Shaders.blur)
+
+            love.graphics.draw(self.lightingBuffer)
+
+            love.graphics.setShader()
 
         -- render normals and textures
         love.graphics.setBlendMode("multiply", "premultiplied")
     
-        love.graphics.draw(self.normalMap)
+            love.graphics.draw(self.normalMap)
     
-        love.graphics.draw(self.texBuffer)
+            love.graphics.draw(self.texBuffer)
     
         love.graphics.setBlendMode("alpha")
 

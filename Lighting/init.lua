@@ -1,7 +1,7 @@
 _Shaders = {}
-_Shaders.light = love.graphics.newShader("Lighting/shaders/light.glsl")
-_Shaders.normal = love.graphics.newShader("Lighting/shaders/normal.glsl")
-_Shaders.blur = love.graphics.newShader("Lighting/shaders/blur.glsl")
+_Shaders.light = love.graphics.newShader("Lighting/shaders/light.frag")
+_Shaders.normal = love.graphics.newShader("Lighting/shaders/normal.frag")
+_Shaders.blur = love.graphics.newShader("Lighting/shaders/blur.frag")
 
 _Lighting = {}
 _Lighting.lightWorld = require("Lighting.lightWorld")
