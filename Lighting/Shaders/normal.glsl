@@ -13,7 +13,7 @@
 
 		// Direction of the light
 		// I don't know why but the formula for the 'y' coordinate seems to solve a issue here
-		vec3 LightDir = vec3( dist, 1000 );
+		vec3 LightDir = vec3( dist, 1 );
 		
 		// Normalize the normal map
 		vec3 N = normalize(NormalMap.rgb * 2.0 - 1.0);

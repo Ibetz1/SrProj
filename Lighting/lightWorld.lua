@@ -28,6 +28,7 @@ function world:setBuffers(w, h)
     local w, h = w or love.graphics.getWidth(), h or love.graphics.getHeight()
     w, h = w * self.resolutionScaling, h * self.resolutionScaling
 
+    self.normalBuffer = love.graphics.newCanvas(w, h)
     self.drawBuffer =      love.graphics.newCanvas(w, h)
     self.texBuffer =       love.graphics.newCanvas(w, h)
     self.lightingBuffer =  love.graphics.newCanvas(w, h)
@@ -46,28 +47,24 @@ function world:renderLights(dt)
         for i = 1, #self.lights do
             local light = self.lights[i]
 
+            -- render occlusion
             for o = 1, #self.occluders do
                 local occluder = self.occluders[o]
                 local px, py = light.position:unpack()
 
-                light:updateNormalBuffer(function()
-                    if not occluder:inRange(px, py, light.range) then return end
-
-                    occluder:renderNormal(px, py, light.position.z, -px + light.range, -py + light.range)
-
-                end)
-
+                -- update shadow buffer
                 light:updateShadowBuffer(function()
                     if not occluder:inRange(px, py, light.range) then return end
 
                     occluder:renderShadow(px, py, light.position.z, light.range, -px + light.range, -py + light.range)
+
                 end)
 
             end
 
             light:update(dt)
 
-            love.graphics.setBlendMode("add", "premultiplied")
+            love.graphics.setBlendMode("screen", "premultiplied")
 
             light:draw()
 
@@ -91,12 +88,35 @@ function world:renderTextures()
     love.graphics.setCanvas()
 end
 
+-- render normals
+function world:renderNormals()
+    love.graphics.setCanvas(self.normalMap)
+
+    love.graphics.clear(1, 1, 1)
+
+    -- iterate lights
+    for l = 1, #self.lights do
+        local light = self.lights[l]
+        local px, py = light.position:unpack()
+
+        -- render normals
+        for i = 1, #self.occluders do
+            local occluder = self.occluders[i]
+
+            _ = (not occluder:inRange(px, py, light.range)) or occluder:renderNormal(px, py, light.range, 0, 0)
+        end
+    end
+
+    love.graphics.setCanvas()
+end
+
 function world:renderGlow()
 end
 
 -- updates world
 function world:update(dt)
     self:renderLights()
+    self:renderNormals()
     self:renderGlow()
     self:renderTextures()
 
@@ -109,12 +129,23 @@ function world:update(dt)
 
         love.graphics.scale(self.scale.x, self.scale.y)
 
-        love.graphics.setBlendMode("add", "premultiplied")
+
+        _Shaders.blur:send("Size", {self.lightingBuffer:getWidth(), self.lightingBuffer:getHeight()})
+
+        love.graphics.setShader(_Shaders.blur)
+
+        -- render lighting buffer
+        love.graphics.setBlendMode("add")
 
         love.graphics.draw(self.lightingBuffer)
-        
-        love.graphics.setBlendMode("multiply", "premultiplied")
+    
+        love.graphics.setShader()
 
+        -- render normals and textures
+        love.graphics.setBlendMode("multiply", "premultiplied")
+    
+        love.graphics.draw(self.normalMap)
+    
         love.graphics.draw(self.texBuffer)
     
         love.graphics.setBlendMode("alpha")
@@ -132,10 +163,7 @@ function world:draw()
     love.graphics.scale(1 / self.resolutionScaling)
     love.graphics.translate(self.translation:unpack())
 
-    -- love.graphics.draw(self.drawBuffer)
-
     love.graphics.draw(self.drawBuffer)
-
 
     love.graphics.pop()
 end

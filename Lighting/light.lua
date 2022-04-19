@@ -11,16 +11,6 @@ function light:init(x, y, range, color)
     self.normalBuffer = love.graphics.newCanvas(range * 2, range * 2)
 end
 
--- updates normal buffer
-function light:updateNormalBuffer(f, ...)
-    local canvas = love.graphics.getCanvas()
-    love.graphics.setCanvas(self.normalBuffer)
-
-    f(...)
-
-    love.graphics.setCanvas(canvas)
-end
-
 -- updates shadow buffer
 function light:updateShadowBuffer(f, ...)
     local canvas = love.graphics.getCanvas()
@@ -47,20 +37,8 @@ function light:update(dt)
 
         love.graphics.setShader()
 
-        -- apply shadows and normals
-        love.graphics.setBlendMode("subtract")
-
-        love.graphics.setCanvas(self.shadowBuffer)
-
-            love.graphics.setBlendMode("subtract", "premultiplied")
-
-            love.graphics.draw(self.normalBuffer)
-        
-            love.graphics.setBlendMode("alpha")
-
-        love.graphics.setCanvas(self.buffer)
-
-        love.graphics.setBlendMode("subtract", "premultiplied")
+        -- subtract shadows from light
+        love.graphics.setBlendMode("multiply", "premultiplied")
 
         love.graphics.draw(self.shadowBuffer)
 
@@ -78,8 +56,7 @@ function light:draw()
 
     local buffer = love.graphics.getCanvas()
 
-    love.graphics.setCanvas(self.shadowBuffer); love.graphics.clear(0, 0, 0)
-    love.graphics.setCanvas(self.normalBuffer); love.graphics.clear(0, 0, 0)
+    love.graphics.setCanvas(self.shadowBuffer); love.graphics.clear(1, 1, 1)
 
     love.graphics.setCanvas(buffer)
 end

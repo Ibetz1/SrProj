@@ -25,7 +25,7 @@ function occluder:renderShadow(lx, ly, lz, length, ox, oy)
         return
     end
 
-    -- love.graphics.setColor(0, 0, 0)
+    love.graphics.setColor(0, 0, 0)
 
     -- render poly shadows
     for i = 1, #self.matrix do
@@ -42,6 +42,10 @@ function occluder:renderShadow(lx, ly, lz, length, ox, oy)
 
         love.graphics.polygon("fill", x1 + ox, y1 + oy, x2 + ox, y2 + oy, x3 + ox, y3 + oy, x4 + ox, y4 + oy)
     end
+
+    love.graphics.setColor(1, 1, 1)
+
+    love.graphics.rectangle("fill", self.position.x + ox, self.position.y + oy, self.w, self.h)
 end
 
 -- draws texture
