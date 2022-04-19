@@ -14,9 +14,10 @@ _Constants = {
     Tilesize = 16
 }
 
-_Res = {
+_Screen = {
     love.graphics.getWidth(),
-    love.graphics.getHeight()
+    love.graphics.getHeight(),
+    ResolutionScaling = 0.25
 }
 
 -- imports directory

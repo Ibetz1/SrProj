@@ -4,6 +4,7 @@ function occluder:init(x, y, w, h, settings)
     local w, h = w or 0, h or 0
 
     self.position = Vector(x, y)
+    self.offset = Vector(x, y)
     self.w, self.h = w, h
 
     -- optional
@@ -20,8 +21,12 @@ end
 
 -- renders shadow
 function occluder:renderShadow(lx, ly, lz, length, ox, oy)
+    local rx, ry = _Screen.ResolutionScaling, _Screen.ResolutionScaling
 
-    if aabb(lx, ly, 0, 0, self.position.x, self.position.y, self.w, self.h) then
+    local px, py = self.position.x * rx, self.position.y * ry
+    local slx, sly = lx * rx, ly * ry
+
+    if aabb(slx, sly, 0, 0, px, py, self.w * _Screen.ResolutionScaling, self.h * _Screen.ResolutionScaling) then
         return
     end
 
@@ -33,19 +38,20 @@ function occluder:renderShadow(lx, ly, lz, length, ox, oy)
         x1, y1 = x1 + self.position.x, y1 + self.position.y
         x2, y2 = x2 + self.position.x, y2 + self.position.y
 
-        local d1x, d1y = lx - x1, ly - y1
-        local d2x, d2y = lx - x2, ly - y2
+        local d1x, d1y = (lx - x1), (ly - y1)
+        local d2x, d2y = (lx - x2), (ly - y2)
         local t1, t2 = math.atan2(d1y, d1x), math.atan2(d2y, d2x)
 
-        local x3, y3 = math.cos(t2) * -2 * length + self.position.x, math.sin(t2) * -2 * length + self.position.y
-        local x4, y4 = math.cos(t1) * -2 * length + self.position.x, math.sin(t1) * -2 * length + self.position.y
+        local x3, y3 = (math.cos(t2) * -2 * length + self.position.x), (math.sin(t2) * -2 * length + self.position.y)
+        local x4, y4 = (math.cos(t1) * -2 * length + self.position.x), (math.sin(t1) * -2 * length + self.position.y)
+
+        x1, x2, x3, x4 = x1 * rx, x2 * rx, x3 * rx, x4 * rx
+        y1, y2, y3, y4 = y1 * ry, y2 * ry, y3 * ry, y4 * ry
 
         love.graphics.polygon("fill", x1 + ox, y1 + oy, x2 + ox, y2 + oy, x3 + ox, y3 + oy, x4 + ox, y4 + oy)
     end
 
     love.graphics.setColor(1, 1, 1)
-
-    love.graphics.rectangle("fill", self.position.x + ox, self.position.y + oy, self.w, self.h)
 end
 
 -- renders normal
@@ -132,12 +138,14 @@ function occluder:setSize(w, h)
 end
 
 -- resizes matrix
-function occluder:sizeMatrix(w, h)
+function occluder:sizeMatrix(w, h, ox, oy)
+    local ox, oy = ox or self.offset.x, oy or self.offset.y
+
     self.matrix = Matrix {
-        {0, 0, w, 0}, 
-        {w, 0, w, h}, 
-        {w, h, 0, h}, 
-        {0, h, 0, 0}
+        {ox, oy, w + ox, oy}, 
+        {w + ox, oy, w + ox, h + oy}, 
+        {w + ox, h + oy, ox, h + oy}, 
+        {ox, h + oy, ox, oy}
     }
 end
 

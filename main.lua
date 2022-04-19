@@ -7,18 +7,24 @@ love.window.setVSync(0)
 
 require("Lighting")
 
-local lw = _Lighting.lightWorld({0.1, 0.1, 0.1})
-local light = _Lighting.light(100, 100, 200, {1, 0, 0})
-local light1 = _Lighting.light(200, 200, 200, {0, 0.5, 1})
-local occluder = _Lighting.occluder(200, 100, 32, 48)
+local lw = _Lighting.lightWorld({0.1, 0.1, 0.2})
+local light = _Lighting.light(100, 100, 200, {0.5, 0.5, 0.5})
+
+for i = 1, 5 do
+    local x, y = 100 + i * 32, 100 + i * 48
+    local occluder = _Lighting.occluder(x, y, 32, 26, {
+        offset = Vector(0, 20)
+    })
+    occluder:setTexture(_Assets.machine)
+    occluder:setNormal(_Assets.machine_normal)
+    occluder:setGlow(_Assets.machine_glow)
+
+    lw:addOccluder(occluder)
+end
 
 lw:addLight(light)
-lw:addLight(light1)
-lw:addOccluder(occluder)
 
-occluder:setTexture(_Assets.machine)
-occluder:setNormal(_Assets.machine_normal)
-occluder:setGlow(_Assets.machine_glow)
+
 
 function love.load()
 end
