@@ -20,11 +20,15 @@ function light:sizeBuffer()
 end
 
 -- updates shadow buffer
-function light:updateShadowBuffer(f, ...)
+function light:updateShadowBuffer(f, tx, ty, ...)
     local canvas = love.graphics.getCanvas()
     local blendMode = love.graphics.getBlendMode()
     love.graphics.setCanvas(self.shadowBuffer)
+    love.graphics.origin()
+
     love.graphics.setBlendMode("alpha")
+
+    -- love.graphics.translate(tx, ty)
 
     f(...)
 
@@ -32,17 +36,20 @@ function light:updateShadowBuffer(f, ...)
     love.graphics.setBlendMode(blendMode)
 end
 
-function light:update(dt)
-    local bw, bh = self.buffer:getWidth(), self.buffer:getHeight()
+function light:update(dt, tx, ty)
+    local bw, bh = self.shadowBuffer:getWidth(), self.shadowBuffer:getHeight()
 
     -- pass info onto shader
     _Shaders.light:send("Radius", self.range * _Screen.ResolutionScaling)
-    _Shaders.light:send("Position", {bw / 2, bh / 2, self.position.z})
+    _Shaders.light:send("Position", {(bw / 2), (bh / 2), self.position.z})
     _Shaders.blur:send("Size", {bw, bh})
 
     local buffer = love.graphics.getCanvas()
+
+    -- draw to buffer
     love.graphics.setCanvas(self.buffer)
         love.graphics.clear(0, 0, 0)
+        love.graphics.origin()
 
         love.graphics.setShader(_Shaders.light)
 
@@ -97,6 +104,13 @@ end
 -- sets world
 function light:setWorld(w) 
     self.world = w
+end
+
+-- sets color
+function light:setColor(r, g, b)
+    self.color[1] = r or self.color[1]
+    self.color[2] = g or self.color[2]
+    self.color[3] = b or self.color[3]
 end
 
 return light

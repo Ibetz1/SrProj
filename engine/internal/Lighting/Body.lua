@@ -1,16 +1,22 @@
-local occluder = Object:new()
+local body = Object:new()
 
-function occluder:init(x, y, w, h, settings)
+function body:init(x, y, w, h, settings)
     local w, h = w or 0, h or 0
 
     self.position = Vector(x, y)
     self.offset = Vector(x, y)
     self.w, self.h = w, h
 
+    self.occlude = true
+
     -- optional
     self.texture = nil
     self.normal = nil
     self.glow = nil
+
+    -- glow settings
+    self.glowColor = {1, 1, 0}
+    self.glowStrength = 1
 
     for name, val in pairs(settings or {}) do
         self[name] = val
@@ -20,13 +26,19 @@ function occluder:init(x, y, w, h, settings)
 end
 
 -- renders shadow
-function occluder:renderShadow(lx, ly, lz, length, ox, oy)
+function body:renderShadow(lx, ly, length, ox, oy, tx, ty)
+    if not self.occlude then return end
+
     local rx, ry = _Screen.ResolutionScaling, _Screen.ResolutionScaling
+    local length = length * 1 / rx
 
     local px, py = self.position.x * rx, self.position.y * ry
     local slx, sly = lx * rx, ly * ry
 
-    if aabb(slx, sly, 0, 0, px, py, self.w * _Screen.ResolutionScaling, self.h * _Screen.ResolutionScaling) then
+    if aabb(slx, sly, 0, 0, 
+            px + (self.offset.x * _Screen.ResolutionScaling), 
+            py + (self.offset.y * _Screen.ResolutionScaling), 
+            self.w * _Screen.ResolutionScaling, self.h * _Screen.ResolutionScaling) then
         return
     end
 
@@ -38,8 +50,8 @@ function occluder:renderShadow(lx, ly, lz, length, ox, oy)
         x1, y1 = x1 + self.position.x, y1 + self.position.y
         x2, y2 = x2 + self.position.x, y2 + self.position.y
 
-        local d1x, d1y = (lx - x1), (ly - y1)
-        local d2x, d2y = (lx - x2), (ly - y2)
+        local d1x, d1y = (lx - x1) , (ly - y1) 
+        local d2x, d2y = (lx - x2) , (ly - y2) 
         local t1, t2 = math.atan2(d1y, d1x), math.atan2(d2y, d2x)
 
         local x3, y3 = (math.cos(t2) * -2 * length + self.position.x), (math.sin(t2) * -2 * length + self.position.y)
@@ -55,7 +67,7 @@ function occluder:renderShadow(lx, ly, lz, length, ox, oy)
 end
 
 -- renders normal
-function occluder:renderNormal(x, y, z, ox, oy)
+function body:renderNormal(x, y, z, ox, oy)
     if not self.normal then return end
 
     _Shaders.normal:send("LightPos", {x, y, z})
@@ -70,21 +82,39 @@ function occluder:renderNormal(x, y, z, ox, oy)
 end
 
 -- renders glow
-function occluder:renderGlow()
-    if not self.glow then return end
+function body:renderGlow(time)
+    if not self.glow then return false end
 
-    love.graphics.draw(self.glow, self.position.x, self.position.y)
+    _Shaders.glow:send("glowTime", time)
+    _Shaders.glow:send("glowImage", self.glow)
+
+    -- renders object glow
+    love.graphics.setShader(_Shaders.glow)
+
+    love.graphics.setColor(
+        self.glowColor[1] * self.glowStrength, self.glowColor[2] * self.glowStrength, self.glowColor[3] * self.glowStrength
+    )
+
+    if not self:renderTexture() then
+        love.graphics.draw(self.glow, self.position.x, self.position.y)
+    end
+
+    love.graphics.setShader()
+
+    love.graphics.setColor(1, 1, 1)
 end
 
 -- draws texture
-function occluder:drawTexture()
-    if not self.texture then return end
+function body:renderTexture()
+    if not self.texture then return false end
 
     love.graphics.draw(self.texture, self.position.x, self.position.y)
+
+    return true
 end
 
 -- sets texture
-function occluder:setTexture(tex, resize)
+function body:setTexture(tex, resize)
     self.texture = tex
 
     if resize then
@@ -94,17 +124,24 @@ function occluder:setTexture(tex, resize)
 end
 
 -- sets normal
-function occluder:setNormal(normal)
+function body:setNormal(normal)
     self.normal = normal
 end
 
 -- sets glow map
-function occluder:setGlow(glow)
+function body:setGlow(glow)
     self.glow = glow
 end
 
+-- sets glow color
+function body:setGlowColor(r, g, b)
+    self.glowColor[1] = r or self.glowColor[1]
+    self.glowColor[2] = g or self.glowColor[2]
+    self.glowColor[3] = b or self.glowColor[3]
+end
+
 -- checks if light in range
-function occluder:inRange(lx, ly, d)
+function body:inRange(lx, ly, d)
     local dsq = d * d
     for i = 1, #self.matrix do
         local px, py = self.matrix[i][1] + self.position.x, self.matrix[i][2] + self.position.y
@@ -117,12 +154,12 @@ function occluder:inRange(lx, ly, d)
 end
 
 -- sets world
-function occluder:setWorld(world)
+function body:setWorld(world)
     self.world = world
 end
 
 -- sets position
-function occluder:setPosition(x, y)
+function body:setPosition(x, y)
     if x and not y then
         self.position = x
         return
@@ -131,14 +168,14 @@ function occluder:setPosition(x, y)
     self.position.x, self.position.y = x, y
 end
 
--- resizes occluder
-function occluder:setSize(w, h)
+-- resizes body
+function body:setSize(w, h)
     self.w, self.h = w, h
     self:sizeMatrix(w, h)
 end
 
 -- resizes matrix
-function occluder:sizeMatrix(w, h, ox, oy)
+function body:sizeMatrix(w, h, ox, oy)
     local ox, oy = ox or self.offset.x, oy or self.offset.y
 
     self.matrix = Matrix {
@@ -149,4 +186,4 @@ function occluder:sizeMatrix(w, h, ox, oy)
     }
 end
 
-return occluder
+return body

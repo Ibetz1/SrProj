@@ -2,6 +2,7 @@ local _PACKAGE = string.gsub(...,"%.","/") or ""
 if string.len(_PACKAGE) > 0 then _PACKAGE = _PACKAGE .. "/" end
 
 _IMAGEPATH          = _IMAGEPATH or "assets"
+_SHADERPATH         = _SHADERPATH or "shaders"
 _COMPONENTPATH      = _COMPONENTPATH or _PACKAGE .. "components"
 _UTILITYPATH        = _UTILITYPATH or _PACKAGE .. "util"
 _INTERNALPATH       = _INTERNALPATH or _PACKAGE .. "internal"
@@ -17,7 +18,7 @@ _Constants = {
 _Screen = {
     love.graphics.getWidth(),
     love.graphics.getHeight(),
-    ResolutionScaling = 0.25
+    ResolutionScaling = 0.75
 }
 
 -- imports directory
@@ -31,7 +32,6 @@ local function importDir(settings)
             t[name] = dir
 
             if settings["global"] then _G[name] = dir end
-
         end
     end
 
@@ -44,7 +44,6 @@ _Util       = importDir {path = _UTILITYPATH, sub = ".lua", global = true}
 _Internal   = importDir {path = _INTERNALPATH, sub = ".lua", ignore = true}
 _Components = importDir {path = _COMPONENTPATH, sub = ".lua", global = true}
 
-
 -- import assets
 _Assets = {}
 local content = love.filesystem.getDirectoryItems(_IMAGEPATH)
@@ -52,4 +51,10 @@ for _, c in pairs(content) do
     if string.match(c, ".png") then _Assets[c:gsub(".png", "")] = love.graphics.newImage("assets/" .. c) end
     if string.match(c, ".jpg") then _Assets[c:gsub(".jpg", "")] = love.graphics.newImage("assets/" .. c) end
     if string.match(c, ".gif") then _Assets[c:gsub(".gif", "")] = love.graphics.newImage("assets/" .. c) end
+end
+
+_Shaders = {}
+local content = love.filesystem.getDirectoryItems(_SHADERPATH)
+for _, c in pairs(content) do
+    if string.match(c, ".frag") then _Shaders[c:gsub(".frag", "")] = love.graphics.newShader("shaders/" .. c) end
 end

@@ -9,17 +9,6 @@ local comp = Object:new({
 
 function comp:init(image, normal, glow)
     self.remove = false
-
-    self.image = image
-    self.normal = normal
-    self.glow = glow
-
-    if image then
-        self.w = image:getWidth()
-        self.h = image:getHeight()
-    end
-
-    self.scale = 1
 end
 
 function comp:onadd()
@@ -43,12 +32,6 @@ end
 function comp:setImage(image)
     self.image = image
 end
-
--- scales image
-function comp:scale(scale)
-    self.scale = scale
-end
-
 
 function comp:draw()
     local body = self.parent.Body

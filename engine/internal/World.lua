@@ -1,14 +1,13 @@
 local world = Object:new()
 
-function world:init(w, h, d)
+function world:init(w, h, d, ambience)
     self.w, self.h, self.d = w, h, d
     self.physicsGrid = Array3D(w, h, d)
 
     -- entity pointers
     self.entities = {}
     self.drawOrder = {}
-    self.numEntities = 0
-    self.buffer = love.graphics.newCanvas()
+    self.numEntities = {}
 
     for l = 1, d  do 
         self.entities[l], self.drawOrder[l] = {}, {}
@@ -25,6 +24,9 @@ function world:init(w, h, d)
     self.zoomDiffuse = 1
 
     self.initialized = false
+
+    -- rendering
+    self.lightWorld = _Lighting.LightWorld(ambience or {0, 0, 0})
 end
 
 function world:onadd()
@@ -129,15 +131,6 @@ end
 -- draw world
 function world:draw()
     love.graphics.push()
-        love.graphics.scale(self.scale)
-
-        -- pre render entities
-        for l = 1, self.d do
-            for _, id in pairs(self.drawOrder[l]) do
-                local ent = self.entities[l][id]
-                if ent.draw then ent:draw() end
-            end
-        end
 
     love.graphics.pop()
 end
