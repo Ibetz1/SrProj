@@ -29,8 +29,6 @@ end
 -- sets buffers
 function world:setBuffers(w, h)
     local w, h = w or love.graphics.getWidth(), h or love.graphics.getHeight()
-    
-    w, h = w * _Screen.aspectRatio.x, h * _Screen.aspectRatio.y
 
     -- non resolution scales
     self.normalMap = love.graphics.newCanvas(w, h)

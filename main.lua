@@ -21,7 +21,7 @@ for i = 1, 5 do
     lw:addBody(occluder)
 end
 
-lw:setScale(2, 2)
+lw:setScale(1.5, 1.5)
 lw:addLight(light)
 
 
