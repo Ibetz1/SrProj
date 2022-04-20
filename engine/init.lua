@@ -14,13 +14,6 @@ _Constants = {
     Gravity = 100,
     Tilesize = 16
 }
-
-_Screen = {
-    love.graphics.getWidth(),
-    love.graphics.getHeight(),
-    ResolutionScaling = 0.75
-}
-
 -- imports directory
 local function importDir(settings)
     local content = love.filesystem.getDirectoryItems(settings["path"])
@@ -43,6 +36,43 @@ end
 _Util       = importDir {path = _UTILITYPATH, sub = ".lua", global = true}
 _Internal   = importDir {path = _INTERNALPATH, sub = ".lua", ignore = true}
 _Components = importDir {path = _COMPONENTPATH, sub = ".lua", global = true}
+
+_Screen = {
+    love.graphics.getWidth(),
+    love.graphics.getHeight(),
+    aspectRatio = Vector(1, 1),
+    aspectTranslation = Vector(),
+    ResolutionScaling = 0.75,
+    smallScreenSize = Vector(love.graphics.getWidth(), love.graphics.getHeight()),
+    fullScreenSize = Vector(),
+    isfullscreen = false
+}
+
+function _Screen:fullscreen()
+
+    love.window.setFullscreen(not self.isfullscreen)
+
+    self.isfullscreen = love.window.getFullscreen()
+
+    self[1], self[2] = love.graphics.getWidth(), love.graphics.getHeight()
+
+    -- size aspect ratio
+    if self.isfullscreen then
+        self.fullScreenSize.x = love.graphics.getWidth()
+        self.fullScreenSize.y = love.graphics.getHeight()
+
+        local aspect = math.min(self.fullScreenSize.x / self.smallScreenSize.x, self.fullScreenSize.y / self.smallScreenSize.y)
+
+        self.aspectRatio.x, self.aspectRatio.y = aspect, aspect
+
+        self.aspectTranslation.x = (self.fullScreenSize.x - (self.smallScreenSize.x * self.aspectRatio.x)) / 2
+        self.aspectTranslation.y = (self.fullScreenSize.y - (self.smallScreenSize.y * self.aspectRatio.y)) / 2
+    else
+        self.aspectRatio.x, self.aspectRatio.y = 1, 1
+        self.aspectTranslation.x, self.aspectTranslation.y = 0, 0
+    end
+end
+
 
 -- import assets
 _Assets = {}
