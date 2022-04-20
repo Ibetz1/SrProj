@@ -21,8 +21,8 @@ for i = 1, 5 do
     lw:addBody(occluder)
 end
 
-lw:setScale(1.5, 1.5)
-lw:setTranslation(100, 0)
+lw:setScale(1.6, 1.6)
+-- lw:setTranslation(100, 0)
 lw:addLight(light)
 
 
@@ -41,7 +41,9 @@ function love.update(dt)
 
     light:setColor(HSV(theta, 1, 1))
 
-    light:setPosition(love.mouse.getX() / lw.scale.x - 100, love.mouse.getY() / lw.scale.y)
+    local px, py = lw:translateScreenCoord(love.mouse.getPosition())
+
+    light:setPosition(px, py)
 
     lw:update(dt)
 end
@@ -55,11 +57,13 @@ end
 
 function love.mousepressed(x, y, b)
     if b == 1 then
-        local light = _Lighting.Light(x / lw.scale.x - 100, y / lw.scale.x, 200, {HSV(theta, 1, 1)})
+        local px, py = lw:translateScreenCoord(x, y)
+
+        local light = _Lighting.Light(px, py, 200, {HSV(theta, 1, 1)})
         lw:addLight(light)
     end
 
     if b == 2 then
-        love.window.setFullscreen(not love.window.getFullscreen())
+        _Screen:fullscreen()
     end
 end

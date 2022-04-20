@@ -29,7 +29,6 @@ end
 -- sets buffers
 function world:setBuffers(w, h)
     local w, h = w or love.graphics.getWidth(), h or love.graphics.getHeight()
-    w, h = w / self.scale.x, h / self.scale.y
 
     -- non resolution scales
     self.normalMap = love.graphics.newCanvas(w, h)
@@ -183,6 +182,8 @@ function world:update(dt)
     self:renderNormals()
     self:renderGlow(dt)
 
+    love.graphics.push()
+
     love.graphics.setCanvas(self.drawBuffer)
         love.graphics.origin()
         love.graphics.clear(unpack(self.ambience))
@@ -190,11 +191,11 @@ function world:update(dt)
         -- render lighting buffer
         love.graphics.setBlendMode("add")
 
-            love.graphics.scale(1 / _Screen.ResolutionScaling)
+            love.graphics.scale((1 / _Screen.ResolutionScaling * self.scale.x), (1 / _Screen.ResolutionScaling * self.scale.y))
 
             love.graphics.draw(self.lightingBuffer)
 
-            love.graphics.scale(_Screen.ResolutionScaling)
+            love.graphics.scale(_Screen.ResolutionScaling, _Screen.ResolutionScaling)
 
 
         -- render normals and textures
@@ -212,6 +213,10 @@ function world:update(dt)
 
     love.graphics.setCanvas()
 
+    love.graphics.pop()
+
+    love.graphics.scale(1, 1)
+
 end
 
 -- draws world
@@ -220,7 +225,8 @@ function world:draw()
     love.graphics.origin()
 
     -- scale
-    love.graphics.scale(self.scale.x, self.scale.y)
+    love.graphics.translate(_Screen.aspectTranslation:unpack())
+    love.graphics.scale(_Screen.aspectRatio.x, _Screen.aspectRatio.y) 
 
     love.graphics.draw(self.drawBuffer)
 
@@ -266,5 +272,13 @@ function world:addBody(body)
 end
 
 function world:removeBody(index) table.remove(self.bodies, index) end
+
+-- translates screen coord to scaled coord
+function world:translateScreenCoord(x, y)
+    local x = (x / self.scale.x / _Screen.aspectRatio.x) - self.translation.x - (_Screen.aspectTranslation.x / 3)
+    local y = (y / self.scale.x / _Screen.aspectRatio.y) - self.translation.y - (_Screen.aspectTranslation.y / 3)
+
+    return x , y
+end
 
 return world
