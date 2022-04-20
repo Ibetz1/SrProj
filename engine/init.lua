@@ -41,7 +41,6 @@ _Screen = {
     love.graphics.getWidth(),
     love.graphics.getHeight(),
     aspectRatio = Vector(1, 1),
-    aspectTranslation = Vector(),
     ResolutionScaling = 0.75,
     smallScreenSize = Vector(love.graphics.getWidth(), love.graphics.getHeight()),
     fullScreenSize = Vector(),
@@ -64,12 +63,8 @@ function _Screen:fullscreen()
         local aspect = math.min(self.fullScreenSize.x / self.smallScreenSize.x, self.fullScreenSize.y / self.smallScreenSize.y)
 
         self.aspectRatio.x, self.aspectRatio.y = aspect, aspect
-
-        self.aspectTranslation.x = (self.fullScreenSize.x - (self.smallScreenSize.x * self.aspectRatio.x)) / 2
-        self.aspectTranslation.y = (self.fullScreenSize.y - (self.smallScreenSize.y * self.aspectRatio.y)) / 2
     else
         self.aspectRatio.x, self.aspectRatio.y = 1, 1
-        self.aspectTranslation.x, self.aspectTranslation.y = 0, 0
     end
 end
 
