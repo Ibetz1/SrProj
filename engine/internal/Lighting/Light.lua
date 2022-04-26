@@ -17,6 +17,8 @@ function light:sizeBuffer()
 
     self.buffer = love.graphics.newCanvas(w, h)
     self.shadowBuffer = love.graphics.newCanvas(w, h)
+
+    -- self.buffer:setFilter("nearest", "nearest")
 end
 
 -- updates shadow buffer
@@ -27,8 +29,6 @@ function light:updateShadowBuffer(f, tx, ty, ...)
     love.graphics.origin()
 
     love.graphics.setBlendMode("alpha")
-
-    -- love.graphics.translate(tx, ty)
 
     f(...)
 
@@ -61,11 +61,11 @@ function light:update(dt, tx, ty)
         -- subtract shadows from light
         love.graphics.setBlendMode("multiply", "premultiplied")
 
-            love.graphics.setShader(_Shaders.blur)
+            -- love.graphics.setShader(_Shaders.blur)
 
             love.graphics.draw(self.shadowBuffer)
 
-            love.graphics.setShader()
+            -- love.graphics.setShader()
 
         love.graphics.setBlendMode("alpha")
 
@@ -98,7 +98,6 @@ function light:setPosition(x, y, z)
     self.position.y = y or self.position.y
     self.position.z = z or self.position.z
 
-    self.moved = true
 end
 
 -- sets world

@@ -5,7 +5,7 @@ extern vec2 Size;
 const float Quality = 1.0;
 
 // The radius of the pixels that are analized
-const float Radius = 2.0;
+const float Radius = 1.0;
 
 vec4 effect(vec4 color, Image tex, vec2 tc, vec2 pc) {
     

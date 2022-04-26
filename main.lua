@@ -1,69 +1,51 @@
 love.graphics.setDefaultFilter("nearest", "nearest")
 require("engine")
 local game = require("game")
-local stack, world, index = game(16, 16, 1)
+local stack, world, index = game(16, 16, 2, {0.2, 0.2, 0.25})
+
+world:setScale(2, 2)
+
+game.constructors:gameWorld1(world, 11, 11)
 
 love.window.setVSync(0)
 
-local lw = _Lighting.LightWorld({0.3, 0.1, 0.2})
-local light = _Lighting.Light(100, 100, 200, {0.5, 0.5, 0.5})
+-- local b1 = game.entities:block(20, 10, 32, 24, 
+--                               _Assets.machine,
+--                               _Assets.machine_normal,
+--                               _Assets.machine_glow, 0, 22)
 
-for i = 1, 5 do
-    local x, y = 100 + i * 32, 100 + i * 48
-    local occluder = _Lighting.Body(x, y, 32, 26, {
-        offset = Vector(0, 20),
-        -- occlude = false
-    })
-    occluder:setTexture(_Assets.machine)
-    occluder:setNormal(_Assets.machine_normal)
-    occluder:setGlow(_Assets.machine_glow)
+-- local b2 = game.entities:wall(50, 50, 3, 1, 32, 24,                              
+--                               _Assets.machine,
+--                               _Assets.machine_normal,
+--                               _Assets.machine_glow, 0, 22)
+                
 
-    lw:addBody(occluder)
-end
+-- world:addEntity(b1)
+-- world:addEntity(b2)
 
-lw:setScale(1.5, 1.5)
-lw:addLight(light)
-
+local light = _Lighting.Light(0, 0, 200, {1, 1, 1})
+world.lightWorld:addLight(light)
 
 
 function love.load()
 end
 
-local theta = 0
-
 function love.update(dt)
+    local x, y = world:convertScreenCoord(love.mouse.getPosition())
+    light:setPosition(x, y)
 
-    theta = theta + 0.5
-    if theta > 360 then
-        theta = 0
-    end
-
-    light:setColor(HSV(theta, 1, 1))
-
-    local px, py = lw:translateScreenCoord(love.mouse.getPosition())
-
-    light:setPosition(px, py)
-
-    lw:update(dt)
+    stack:update(dt)
 end
 
 function love.draw()
-    lw:draw()
+    stack:draw()
 
     love.graphics.print(love.timer.getFPS())
-    love.graphics.print(#lw.lights, 0, 12)
 end
 
-function love.mousepressed(x, y, b)
-    if b == 1 then
-        local px, py = lw:translateScreenCoord(x, y)
-
-        local light = _Lighting.Light(px, py, 200, {HSV(theta, 1, 1)})
-        lw:addLight(light)
-    end
-
-    if b == 2 then
+function love.keypressed(key)
+    if key == "space" then
         _Screen:fullscreen()
-        lw:setBuffers()
+        world:adjustScreenSize()
     end
 end

@@ -22,7 +22,11 @@ function comp:init(x, y, w, h, properties)
 
     self.properties = {
         mass = 1,
-        static = false
+        static = false,
+        directionalLimits = {
+            {-1, 1},
+            {-1, 1}
+        }
     }
 
     if properties then
@@ -47,6 +51,11 @@ end
 function comp:impulse(speed, dir, axis)
     self.direction[axis] = dir
     self.direction:unit()
+
+    local xlim, ylim = self.properties.directionalLimits[1], self.properties.directionalLimits[2]
+
+    self.direction.x = clamp(self.direction.x, xlim[1], xlim[2])
+    self.direction.x = clamp(self.direction.x, ylim[1], ylim[2])
 
     self.accellaration[axis] = self.direction[axis] * speed
 end

@@ -7,37 +7,40 @@ local comp = Object:new({
     }
 })
 
-function comp:init(image, normal, glow)
+function comp:init(image, normal, glow, settings)
     self.remove = false
+    
+    self.body = _Lighting.Body(0, 0, 0, 0, settings)
+
+    -- set textures
+    self:setGlowMap(glow)
+    self:setNormalMap(normal)
+    self:setImage(image)
 end
 
 function comp:onadd()
-    if not self.w then
-        self.w = self.parent.Body.w
-        self.h = self.parent.Body.h
-    end
+    self.parent.world.lightWorld:addBody(self.body)
 end
 
--- sets glow map
-function comp:setGlowMap(glow)
-    self.glow = glow
+function comp:resizeOccluder(w, h)
+    self.body:setSize(w, h)
 end
 
--- sets normal map
-function comp:setNormalMap(normal)
-    self.normal = normal
+-- defines occlusion boundries
+function comp:defineOccluder(w, h, ox, oy)
+    self.body.w, self.body.h = w, h
+    self.body.offset.x, self.body.offset.y = ox or 0, oy or 0
 end
 
--- sets image
-function comp:setImage(image)
-    self.image = image
+-- updates body
+function comp:update()
+    local pos = self.parent.Body.position
+    self.body:setPosition(pos.x, pos.y)
 end
 
-function comp:draw()
-    local body = self.parent.Body
-    local px, py = body.position.x, body.position.y
-
-    love.graphics.draw(self.image, px, py, 0, self.scale)
-end
+-- mapping functions
+function comp:setGlowMap(glow) self.body:setGlow(glow) end
+function comp:setNormalMap(normal) self.body:setNormal(normal) end
+function comp:setImage(image) self.body:setTexture(image) end
 
 return comp

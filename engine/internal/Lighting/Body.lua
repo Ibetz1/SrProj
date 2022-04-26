@@ -1,11 +1,12 @@
+local ceil, floor = math.ceil, math.floor
 local body = Object:new()
 
 function body:init(x, y, w, h, settings)
     local w, h = w or 0, h or 0
 
     self.position = Vector(x, y)
-    self.offset = Vector(x, y)
-    self.w, self.h = w, h
+    self.offset = Vector()
+    self.w, self.h = w or 0, h or 0
 
     self.occlude = true
 
@@ -22,11 +23,11 @@ function body:init(x, y, w, h, settings)
         self[name] = val
     end
 
-    self:sizeMatrix(w, h)
+    self:sizeMatrix(self.w, self.h)
 end
 
 -- renders shadow
-function body:renderShadow(lx, ly, length, ox, oy, tx, ty)
+function body:renderShadow(lx, ly, length, ox, oy)
     if not self.occlude then return end
 
     local rx, ry = _Screen.ResolutionScaling, _Screen.ResolutionScaling
@@ -67,18 +68,10 @@ function body:renderShadow(lx, ly, length, ox, oy, tx, ty)
 end
 
 -- renders normal
-function body:renderNormal(x, y, z, ox, oy)
+function body:renderNormal()
     if not self.normal then return end
 
-    _Shaders.normal:send("LightPos", {x, y, z})
-    
-    local shader = love.graphics.getShader()
-
-    love.graphics.setShader(_Shaders.normal)
-
-    love.graphics.draw(self.normal, self.position.x + ox, self.position.y + oy)
-
-    love.graphics.setShader(shader)
+    love.graphics.draw(self.normal, self.position.x, self.position.y)
 end
 
 -- renders glow
@@ -142,15 +135,8 @@ end
 
 -- checks if light in range
 function body:inRange(lx, ly, d)
-    local dsq = d * d
-    for i = 1, #self.matrix do
-        local px, py = self.matrix[i][1] + self.position.x, self.matrix[i][2] + self.position.y
-        local dx, dy = px - lx, py - ly
-
-        if dx * dx + dy * dy < dsq then return true end
-    end
-
-    return false
+    local px, py = self.position.x, self.position.y
+    return aabb(px, py, self.w, self.h, lx - d, ly - d, d * 2, d * 2)
 end
 
 -- sets world
@@ -160,10 +146,6 @@ end
 
 -- sets position
 function body:setPosition(x, y)
-    if x and not y then
-        self.position = x
-        return
-    end
 
     self.position.x, self.position.y = x, y
 end

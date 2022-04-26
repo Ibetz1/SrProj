@@ -12,7 +12,7 @@ _LIGHTINGPATH       = _LIGHTINGPATH or _PACKAGE .. "lighting"
 _Constants = {
     Friction = 0.8,
     Gravity = 100,
-    Tilesize = 16
+    Tilesize = 32
 }
 -- imports directory
 local function importDir(settings)
@@ -41,10 +41,10 @@ _Screen = {
     love.graphics.getWidth(),
     love.graphics.getHeight(),
     aspectRatio = Vector(1, 1),
-    ResolutionScaling = 0.75,
+    ResolutionScaling = 0.5,
     smallScreenSize = Vector(love.graphics.getWidth(), love.graphics.getHeight()),
     fullScreenSize = Vector(),
-    isfullscreen = false
+    isfullscreen = false,
 }
 
 function _Screen:fullscreen()

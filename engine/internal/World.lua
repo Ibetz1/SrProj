@@ -6,27 +6,16 @@ function world:init(w, h, d, ambience)
 
     -- entity pointers
     self.entities = {}
-    self.drawOrder = {}
-    self.numEntities = {}
+    self.numEntities = 0
 
     for l = 1, d  do 
-        self.entities[l], self.drawOrder[l] = {}, {}
+        self.entities[l] = {}
     end
-
-    self.scale = 1
-    self.currentScale = 1
-
-    self.offset = Vector()
-    self.currentOffset = Vector()
-
-    -- settings
-    self.offsetDiffuse = 1
-    self.zoomDiffuse = 1
 
     self.initialized = false
 
     -- rendering
-    self.lightWorld = _Lighting.LightWorld(ambience or {0, 0, 0})
+    self.lightWorld = _Lighting.LightWorld(ambience or {0, 0, 0}, self.d)
 end
 
 function world:onadd()
@@ -37,16 +26,6 @@ function world:onadd()
     end
 
     self.initialized = true
-end
-
--- resizes screen
-function world:adjustScreenSize(w, h)
-    self.buffer = love.graphics.newCanvas(w or love.graphics.getWidth(), h or love.graphics.getHeight())
-end
-
--- scales world
-function world:setScale(scale)
-    self.scale = scale
 end
 
 -- gets entity by id
@@ -60,34 +39,13 @@ function world:addEntity(ent, layer)
     self.numEntities = self.numEntities + 1
     local layer = layer or 1
 
-    table.insert(self.drawOrder[layer], ent.id)
-    
     self.entities[layer][ent.id] = ent
     self.entities[ent.id] = layer
     ent.world = self
     ent.layer = layer
     ent.layerDepth = self.numEntities
-    ent.drawLayer = #self.drawOrder[layer]
 
     if self.initialized then ent:onadd() end
-end
-
--- swaps draw order between two entities
-function world:swapDrawOrder(ent1, ent2)
-    local drawOrder = self.drawOrder[ent1.layer]
-    drawOrder[ent1.drawLayer], drawOrder[ent2.drawLayer] = drawOrder[ent2.drawLayer], drawOrder[ent1.drawLayer]
-
-    ent1.drawLayer, ent2.drawLayer = ent2.drawLayer, ent1.drawLayer
-end
-
--- swaps occluder inceces in light world
-function world:swapOccluders(occ1, occ2)
-    -- local l1, l2 = occ1.layer, occ2.layer
-    -- if l1 ~= l2 then return end
-    -- local lw = self.lightWorld.bodies[l1]
-
-    -- lw[occ1.id], lw[occ2.id] = lw[occ2.id], lw[occ1.id]
-    -- occ1.id, occ2.id = occ2.id, occ1.id
 end
 
 -- removes entity
@@ -100,13 +58,9 @@ function world:removeEntity(id)
     self.entities[layer][id].remove = true
 end
 
--- translates world
-function world:translate(x, y)
-    self.offset.x, self.offset.y = x, y
-end
-
 -- update world
 function world:update(dt)
+
     -- update entities
     for l = 1, self.d do
 
@@ -126,13 +80,20 @@ function world:update(dt)
             ::next::
         end
     end
+
+    self.lightWorld:update(dt)
 end
 
--- draw world
+-- draws world
 function world:draw()
-    love.graphics.push()
-
-    love.graphics.pop()
+    self.lightWorld:draw()
 end
+
+-- shortcuts
+function world:swapOccluders(b1, b2) self.lightWorld:swapBodies(b1, b2) end
+function world:translate(x, y) self.lightWorld:setTranslation(x, y) end
+function world:adjustScreenSize(w, h) self.lightWorld:setBuffers(w, h) end
+function world:setScale(sx, sy) self.lightWorld:setScale(sx, sy) end
+function world:convertScreenCoord(x, y) return self.lightWorld:translateScreenCoord(x, y) end
 
 return world
