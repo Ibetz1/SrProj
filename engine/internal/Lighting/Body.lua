@@ -14,6 +14,9 @@ function body:init(x, y, w, h, settings)
     self.texture = nil
     self.normal = nil
     self.glow = nil
+    self.texquad = nil
+    self.normquad = nil
+    self.glowquad = nil
 
     -- glow settings
     self.glowColor = {1, 1, 0}
@@ -71,6 +74,11 @@ end
 function body:renderNormal()
     if not self.normal then return end
 
+    if self.normquad then
+        love.graphics.draw(self.normal, self.normquad, self.position.x, self.position.y)
+        return true
+    end
+
     love.graphics.draw(self.normal, self.position.x, self.position.y)
 end
 
@@ -89,7 +97,13 @@ function body:renderGlow(time)
     )
 
     if not self:renderTexture() then
-        love.graphics.draw(self.glow, self.position.x, self.position.y)
+
+        if self.glowquad then
+            love.graphics.draw(self.normal, self.glowquad, self.position.x, self.position.y)
+        else
+            love.graphics.draw(self.glow, self.position.x, self.position.y)
+        end
+
     end
 
     love.graphics.setShader()
@@ -101,29 +115,40 @@ end
 function body:renderTexture()
     if not self.texture then return false end
 
+    if self.texquad then
+        love.graphics.draw(self.texture, self.texquad, self.position.x, self.position.y)
+        return true
+    end
+
     love.graphics.draw(self.texture, self.position.x, self.position.y)
 
     return true
 end
 
 -- sets texture
-function body:setTexture(tex, resize)
+function body:setTexture(tex, resize, quad)
     self.texture = tex
 
     if resize then
         self.w, self.h = tex:getWidth(), tex:getHeight()
         self:sizeMatrix(self.w, self.h)
     end
+
+    self.texquad = quad
 end
 
 -- sets normal
-function body:setNormal(normal)
+function body:setNormal(normal, quad)
     self.normal = normal
+
+    self.normquad = quad
 end
 
 -- sets glow map
-function body:setGlow(glow)
+function body:setGlow(glow, quad)
     self.glow = glow
+
+    self.glowquad = quad
 end
 
 -- sets glow color

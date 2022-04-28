@@ -1,6 +1,8 @@
 love.graphics.setDefaultFilter("nearest", "nearest")
 require("engine")
+require("game/assets")
 local game = require("game")
+
 local stack, world, index = game(16, 16, 2, {0.2, 0.2, 0.25})
 
 world:setScale(2, 2)
