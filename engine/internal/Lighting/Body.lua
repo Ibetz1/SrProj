@@ -14,6 +14,7 @@ function body:init(x, y, w, h, settings)
     self.texture = nil
     self.normal = nil
     self.glow = nil
+
     self.texquad = nil
     self.normquad = nil
     self.glowquad = nil
@@ -72,7 +73,7 @@ end
 
 -- renders normal
 function body:renderNormal()
-    if not self.normal then return end
+    if not self.normal then return false end
 
     if self.normquad then
         love.graphics.draw(self.normal, self.normquad, self.position.x, self.position.y)

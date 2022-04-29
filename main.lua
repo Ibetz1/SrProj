@@ -1,11 +1,10 @@
 love.graphics.setDefaultFilter("nearest", "nearest")
 require("engine")
-require("game/assets")
 local game = require("game")
 
-local stack, world, index = game(16, 16, 2, {0.2, 0.2, 0.25})
+local stack, world, index = game(16, 16, 2, {0.2, 0.2, 0.2})
 
-world:setScale(2, 2)
+world:setScale(3, 3)
 
 game.constructors:gameWorld1(world, 11, 11)
 
@@ -25,17 +24,11 @@ love.window.setVSync(0)
 -- world:addEntity(b1)
 -- world:addEntity(b2)
 
-local light = _Lighting.Light(0, 0, 200, {1, 1, 1})
-world.lightWorld:addLight(light)
-
 
 function love.load()
 end
 
 function love.update(dt)
-    local x, y = world:convertScreenCoord(love.mouse.getPosition())
-    light:setPosition(x, y)
-
     stack:update(dt)
 end
 

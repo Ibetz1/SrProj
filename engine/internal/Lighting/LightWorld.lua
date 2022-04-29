@@ -141,6 +141,8 @@ function world:renderTextures()
     love.graphics.origin()
     love.graphics.translate(self.translation.x, self.translation.y)
 
+    love.graphics.setBlendMode("alpha")
+
     for l = 1, self.d do
         for i = 1, #self.bodies[l] do
             local body = self.bodies[l][i]
@@ -168,7 +170,6 @@ function world:renderNormals()
         for j = 1, #self.lights do
             local light = self.lights[j]
             local px, py = light.position:unpack()
-            px, py = (px / _Screen.ResolutionScaling) / self.scale.x, (py / _Screen.ResolutionScaling) / self.scale.y
 
             _Shaders.normal:send("LightPos", {px, py, light.position.z})
 

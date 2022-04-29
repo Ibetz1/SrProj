@@ -1,24 +1,15 @@
-local renderToGrid = function(tw, th, w, h, tex)
-     for x = 0, tw -1 do
-         for y = 0, th - 1 do
-             local px, py = x * w, y * h
-
-             love.graphics.draw(tex, px, py)
-         end
-     end
-
-end
-
 local controller = require("game/components/Controller")
 
 local game = {
     entities = {
-        block = function(_, x, y, w, h, texture, normal, glow, ox, oy)
+        block = function(_, x, y, w, h, texture, normal, glow, options)
+            local options = options or {}
+
             local ent = _Internal.Entity()
             ent:addComponent(_Components.Ysort())
             ent:addComponent(_Components.Texture(texture, normal, glow, {
                 w = w, h = h,
-                offset = Vector(ox, oy),
+                offset = Vector(options.ox or 0, options.oy or 0),
                 occlude = true
             }))
 
@@ -33,84 +24,68 @@ local game = {
             return ent
         end,
 
-        wall = function(_, x, y, tw, th, w, h, tex, norm, glow, ox, oy)
+        wall = function(_, x, y, texture, normal, glow, tw, th, options)
+            local options = options or {}
+            local tx, nm, gl
+
+            if texture then tx = batchedImage(texture, tw, th) end
+            if normal then nm = batchedImage(normal, tw, th) end
+            if glow then gl = batchedImage(normal, tw, th) end
+
+            local tw, th = tw * (texture.w or _Constants.Tilesize), th * (texture.h or _Constants.Tilesize)
+
             local ent = _Internal.Entity()
-
-            local w, h = w or tw * _Constants.Tilesize, h or th * _Constants.Tilesize
-            local texw, texh = tw * _Constants.Tilesize, th * _Constants.Tilesize
-
-            if tex then texw, texh = tw * tex:getWidth(), th * tex:getHeight() end
-
-            -- make texture map
-            local normal, glowMap
-            local texture = love.graphics.newCanvas(texw, texh)
-
-            love.graphics.setCanvas(texture); renderToGrid(tw, th, w, h, tex)
-
-            -- make normal map
-            if norm then
-                normal = love.graphics.newCanvas(texw, texh) 
-                love.graphics.setCanvas(normal); renderToGrid(tw, th, w, h, norm)
-            end
-
-            -- make glow map
-            if glow then 
-                glowMap = love.graphics.newCanvas(texw, texh) 
-                love.graphics.setCanvas(glowMap); renderToGrid(tw, th, w, h, glow)
-            end
-
-            love.graphics.setCanvas()
-
             ent:addComponent(_Components.Ysort())
-            ent:addComponent(_Components.Texture(texture, normal, glowMap, {
-                w = tw * w, h = th * h,
-                offset = Vector(ox, oy),
+            ent:addComponent(_Components.Texture(tx, nm, gl, {
+                w = options.ow or tw, h = options.oh or th,
+                offset = Vector(options.ox or 0, options.oy or 0),
                 occlude = true
             }))
 
-            ent:addComponent(_Components.PhysicsBody(x, y, tw * w, th * h, {static = true}))
+            ent:addComponent(_Components.PhysicsBody(x, y, options.cw or tw, options.ch or th, {
+                static = true
+            }))
+
             ent:addComponent(_Components.RigidBody())
             ent:addComponent(_Components.PhysicsGridUpdater())
 
             return ent
         end,
 
-        tile = function(_, x, y, tex, norm, glow, tw, th)
-            local w, h = tex:getWidth(), tex:getHeight()
+        tiledImage = function(_, x, y, texture, normal, glow, tw, th, options)
+            local options = options or {}
+            local tx, nm, gl
+
+            if texture then tx = batchedImage(texture, tw, th) end
+            if normal then nm = batchedImage(normal, tw, th) end
+            if glow then gl = batchedImage(normal, tw, th) end
+
+            local ent = _Internal.Entity()
+            ent:addComponent(_Components.Texture(tx, nm, gl, {
+                w = 0, h = 0,
+                occlude = false
+            }))
+
+            ent:addComponent(_Components.WorldBody(x, y, options.cw or tw, options.ch or th))
+
+            return ent
+        end,
+
+        quadedImage = function(_, x, y, w, h, texture, normal, glow, options)
+            local options = options or {}
 
             local ent = _Internal.Entity()
 
-            -- render texture
-            local texture = love.graphics.newCanvas(w * tw, h * th)
-            love.graphics.setCanvas(texture); renderToGrid(tw, th, w, h, tex)
-
-            local normal, glowMap
-
-            -- render normal if needed
-            if norm then 
-                normal = love.graphics.newCanvas(w * tw, h * th)
-                love.graphics.setCanvas(normal); renderToGrid(tw, th, w, h, norm)
-            end
-
-            -- render glow if needed
-            if glow then 
-                glowMap = love.graphics.newCanvas(w * tw, h * th)
-                love.graphics.setCanvas(glowMap); renderToGrid(tw, th, w, h, glow)
-            end
-            
-            love.graphics.setCanvas()
-
-
-            ent:addComponent(_Components.WorldBody(x, y, tw * w, th * h))
-            ent:addComponent(_Components.Texture(texture, normal, glowMap, {
-                w = 0, h = 0,
-                offset = Vector(),
+            ent:addComponent(_Components.Texture(texture, normal, glow, {
+                w = w or options.ow, h = h or options.oh,
                 occlude = false
             }))
-            
-            
+
+            ent:addComponent(_Components.WorldBody(x, y, options.cw or tw, options.ch or th))
             return ent
-        end
+        end,
+
+
     },
 
     __call = function(self, worldW, worldH, worldD, worldAmbience)
@@ -126,44 +101,85 @@ local game = {
 game.constructors = {
     gameWorld1 = function(_, world, tw, th)
 
-        local topWall = game.entities:wall(32, 0, tw - 1, 1, 32, 24,                              
-                                   _Assets.machine,
-                                   _Assets.machine_normal,
-                                   _Assets.machine_glow, 0, 22)
+        local sideWallTex = imageQuad(_Assets.tileset, 0, 0, 16, 32)
+        local sideWallNorm = imageQuad(_Assets.tileset, 32, 0, 16, 32)
+        local frontWallTex = imageQuad(_Assets.tileset, 0, 0, 16, 16)
+        local fromWallNorm = imageQuad(_Assets.tileset, 32, 0, 16, 16)
 
-        local leftWall = game.entities:wall(0, 0, 1, th, 32, 24,                              
-                                   _Assets.machine,
-                                   _Assets.machine_normal,
-                                   _Assets.machine_glow, 0, 22)
+        local leftPlayerTex = imageQuad(_Assets.tileset, 16, 0, 16, 16)
+        local leftPlayerNorm = imageQuad(_Assets.tileset, 48, 0, 16, 16)
+        local leftPlayerGlow = imageQuad(_Assets.tileset, 80, 0, 16, 16)
 
-        local bottomWall = game.entities:wall(32, 24 * (th - 1), tw - 1, 1, 32, 24,                              
-                                   _Assets.machine,
-                                   _Assets.machine_normal,
-                                   _Assets.machine_glow, 0, 22)
+        local downPlayerTex = imageQuad(_Assets.tileset, 16, 16, 16, 16)
+        local downPlayerNorm = imageQuad(_Assets.tileset, 48, 16, 16, 16)
+        local downPlayerGlow = imageQuad(_Assets.tileset, 80, 16, 16, 16)
 
-        local rightWall = game.entities:wall((tw - 1) * 32, 24, 1, th - 2, 32, 24,                              
-                                   _Assets.machine,
-                                   _Assets.machine_normal,
-                                   _Assets.machine_glow, 0, 22)
+        local rightPlayerTex = imageQuad(_Assets.tileset, 16, 32, 16, 16)
+        local rightPlayerNorm = imageQuad(_Assets.tileset, 48, 32, 16, 16)
+        local rightPlayerGlow = imageQuad(_Assets.tileset, 80, 32, 16, 16)
 
-        local background = game.entities:tile(0, 0, _Assets.brick, nil, nil, tw, th)
+        local upPlayerTex = imageQuad(_Assets.tileset, 16, 48, 16, 16)
+        local upPlayerNorm = imageQuad(_Assets.tileset, 48, 48, 16, 16)
+        local upPlayerGlow = imageQuad(_Assets.tileset, 80, 48, 16, 16)
 
-        local player = game.entities:block(64, 64, 32, 24,                                   
-                                   _Assets.machine,
-                                   _Assets.machine_normal,
-                                   _Assets.machine_glow, 0, 22)
+        local floorTile = imageQuad(_Assets.tileset, 0, 32, 16, 16)
         
+        local goalTex = imageQuad(_Assets.tileset, 0, 48, 16, 16)
+        local goalNorm = imageQuad(_Assets.tileset, 32, 48, 16, 16)
+        local goalGlow = imageQuad(_Assets.tileset, 64, 48, 16, 16)
+
+        local player = game.entities:block(32, 32, 16, 13,                                   
+                                    batchedImage(leftPlayerTex, 1, 1),
+                                    batchedImage(leftPlayerNorm, 1, 1),
+                                    batchedImage(leftPlayerGlow, 1, 1), 
+                                    {
+                                       ox = 0, oy = 3
+                                    })
+
+        local topWall = game.entities:wall(0, 0, sideWallTex, sideWallNorm, nil, tw, 1,
+        {
+            ox = 0, oy = 16, oh = 16, ch = 29
+        })
+
+        local bottomWall = game.entities:wall(0, (th - 1) * _Constants.Tilesize, frontWallTex,  fromWallNorm, nil, tw, 1,
+        {
+            ox = 0, oy = 16, oh = 16
+        })
+
+        local leftWall = game.entities:wall(0, _Constants.Tilesize, frontWallTex, fromWallNorm, nil, 1, th - 2,
+        {
+            ox = 0, oy = 0
+        })
+
+        local rightWall = game.entities:wall(_Constants.Tilesize * (tw - 1), _Constants.Tilesize, frontWallTex,  fromWallNorm, nil, 1, th - 2,
+        {
+            ox = 0, oy = 0
+        })
+
+        local floor = game.entities:tiledImage(0, 0, floorTile, nil, nil, tw, th)
+        local goalTex = game.entities:quadedImage(math.floor(tw / 2) * _Constants.Tilesize, math.floor(th / 2) * _Constants.Tilesize, 16, 16, 
+                                        batchedImage(goalTex, 1, 1), 
+                                        batchedImage(goalNorm, 1, 1), 
+                                        batchedImage(goalGlow, 1, 1))
+
+        
+        world:addEntity(floor, 1)
+        world:addEntity(goalTex, 1)
+
         player:addComponent(controller())
+        world:addEntity(player, 2)
 
-        world:addEntity(background, 1)
-        world:addEntity(topWall, 1)
-        world:addEntity(leftWall, 1)
-        world:addEntity(bottomWall, 1)
-        world:addEntity(rightWall, 1)
-        world:addEntity(player, 1)
+        -- walls
+        world:addEntity(topWall, 2)
+        world:addEntity(bottomWall, 2)
+        world:addEntity(leftWall, 2)
+        world:addEntity(rightWall, 2)
 
-        world.lightWorld:setBufferWindow(tw * 32 * world.lightWorld.scale.x, 
-                                        (th * 24 * world.lightWorld.scale.y))
+        world.lightWorld:setBufferWindow(tw * _Constants.Tilesize * world.lightWorld.scale.x, 
+                                        ((th) * _Constants.Tilesize * world.lightWorld.scale.y))
+
+        local light = _Lighting.Light((tw / 2) * _Constants.Tilesize, (th / 2) * _Constants.Tilesize, 200, {0.5, 1, 1})
+        world.lightWorld:addLight(light)
     end
 }
 
