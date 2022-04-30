@@ -15,13 +15,12 @@ function body:init(x, y, w, h, settings)
     self.normal = nil
     self.glow = nil
 
-    self.texquad = nil
-    self.normquad = nil
-    self.glowquad = nil
+    self.alpha = 1
+    self.alphaTick = 0
+    self.fadeout = false
 
     -- glow settings
-    self.glowColor = {1, 1, 0}
-    self.glowStrength = 1
+    self.doGlow = true
 
     for name, val in pairs(settings or {}) do
         self[name] = val
@@ -47,7 +46,7 @@ function body:renderShadow(lx, ly, length, ox, oy)
         return
     end
 
-    love.graphics.setColor(0, 0, 0)
+    love.graphics.setColor(0, 0, 0, self.alpha)
 
     -- render poly shadows
     for i = 1, #self.matrix do
@@ -73,19 +72,15 @@ end
 
 -- renders normal
 function body:renderNormal()
-    if not self.normal then return false end
-
-    if self.normquad then
-        love.graphics.draw(self.normal, self.normquad, self.position.x, self.position.y)
-        return true
-    end
+    if not self.normal or self.fadeout then return false end
 
     love.graphics.draw(self.normal, self.position.x, self.position.y)
 end
 
 -- renders glow
 function body:renderGlow(time)
-    if not self.glow then return false end
+    if not self.glow or self.fadeout then return false end
+
 
     _Shaders.glow:send("glowTime", time)
     _Shaders.glow:send("glowImage", self.glow)
@@ -93,19 +88,11 @@ function body:renderGlow(time)
     -- renders object glow
     love.graphics.setShader(_Shaders.glow)
 
-    love.graphics.setColor(
-        self.glowColor[1] * self.glowStrength, self.glowColor[2] * self.glowStrength, self.glowColor[3] * self.glowStrength
-    )
-
-    if not self:renderTexture() then
-
-        if self.glowquad then
-            love.graphics.draw(self.normal, self.glowquad, self.position.x, self.position.y)
+        if self.doGlow then 
+            self:renderTexture()
         else
-            love.graphics.draw(self.glow, self.position.x, self.position.y)
+            love.graphics.rectangle("fill", self.position.x, self.position.y, self.texture:getWidth(), self.texture:getHeight())
         end
-
-    end
 
     love.graphics.setShader()
 
@@ -113,15 +100,27 @@ function body:renderGlow(time)
 end
 
 -- draws texture
-function body:renderTexture()
+function body:renderTexture(world)
     if not self.texture then return false end
 
-    if self.texquad then
-        love.graphics.draw(self.texture, self.texquad, self.position.x, self.position.y)
-        return true
+    -- check for fadeout and kill
+    if self.fadeout then
+        self.alpha = self.alpha - (self.alphaTick / 10) * love.timer.getDelta()
+        self.alphaTick = self.alphaTick + 1
+
+        if self.alpha <= 0 and world then
+            world:removeBody(self)
+
+            return true
+        end
     end
 
+    local r, g, b, a = love.graphics.getColor()
+    love.graphics.setColor(r, g, b, self.alpha)
+
     love.graphics.draw(self.texture, self.position.x, self.position.y)
+
+    love.graphics.setColor(r, g, b, a)
 
     return true
 end
@@ -192,6 +191,10 @@ function body:sizeMatrix(w, h, ox, oy)
         {w + ox, h + oy, ox, h + oy}, 
         {ox, h + oy, ox, oy}
     }
+end
+
+function body:fadeKill()
+    self.fadeout = true
 end
 
 return body

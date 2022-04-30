@@ -12,6 +12,10 @@ function comp:init(x, y, w, h, properties)
     self.moving = false
     self.remove = false
 
+    self.clip = true
+    self.lock = false
+
+    self.initialPosition = Vector(x, y)
     self.position = Vector(x, y)
     self.velocity = Vector()
     self.direction = Vector()
@@ -49,6 +53,8 @@ end
 
 -- apply an impulse to body
 function comp:impulse(speed, dir, axis)
+    if self.lock then return end
+
     self.direction[axis] = dir
     self.direction:unit()
 

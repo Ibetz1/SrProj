@@ -3,6 +3,7 @@ local entity = Object:new()
 function entity:init()
     self.id = UUID()
     self.remove = false
+    self.removed = false
     self.layer = 1
     self.world = nil
     self.components = {}
@@ -51,8 +52,10 @@ function entity:onadd()
 end
 
 function entity:onremove()
-    for _, comp in pairs(self.components) do
+    for name, comp in pairs(self.components) do
         comp:onremove()
+
+        self.components[name] = nil
     end
 end
 

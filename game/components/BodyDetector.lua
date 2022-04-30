@@ -3,13 +3,19 @@ local comp = _Util.Object:new({
     type = "spacialDetector",
     embed = false,
     requires = {
-        {"WorldBody", "PhysicsBody"},
-        "physicsGridUpdater"
+        {"worldBody", "physicsBody"},
+        "gridUpdater"
     }
 })
 
 function comp:init()
     self.detected = {}
+end
+
+function comp:onremove()
+    if _Game.selected == self.parent.id then
+        _Game.selected = nil
+    end
 end
 
 function comp:update()
@@ -25,14 +31,19 @@ function comp:update()
     for _, id in pairs(cast) do
         local obj = world:getEntity(id)
 
+        if not obj then goto next end
+        if obj.id == self.parent.id then goto next end
+
         if not (obj.components.worldBody or obj.components.rigidBody) then goto next end
 
         local px, py = obj.Body.position.x, obj.Body.position.y
         local w, h = obj.Body.w, obj.Body.h
 
         -- detect entity
-        if aabb(pos.x, pos.y, body.w, body.h, px, py, w, h) then
-            table.insert(self.detected, id)
+        if aabb(pos.x + body.w / 2, pos.y + body.h / 2, 0, 0, px, py, w, h) and obj.Body.clip then
+
+            world:removeEntity(id)
+
         end
 
         ::next::

@@ -71,8 +71,10 @@ function world:renderLights(dt)
                 for l = 1, self.d do
                     for o = 1, #self.bodies[l] do
                         local body = self.bodies[l][o]
-    
+                        
+
                         -- update shadow buffer
+                        if not body then goto next end
                         if not body:inRange(px, py, light.range) or not body.occlude then goto next end
     
                         body:renderShadow(px, py, light.range * _Screen.ResolutionScaling, ox, oy, -self.translation.x, -self.translation.y)
@@ -84,7 +86,7 @@ function world:renderLights(dt)
                             w, h = body.texture:getWidth(), body.texture:getHeight()
                         end
 
-                        love.graphics.setColor(1, 1, 1)
+                        love.graphics.setColor(1, 1, 1, body.alpha)
 
                         love.graphics.rectangle("fill", (body.position.x * _Screen.ResolutionScaling) + ox,
                                                         (body.position.y * _Screen.ResolutionScaling) + oy, 
@@ -125,7 +127,7 @@ function world:normalizeLights()
 
         love.graphics.scale(_Screen.ResolutionScaling, _Screen.ResolutionScaling)
 
-        love.graphics.setBlendMode("multiply", "premultiplied")
+        love.graphics.setBlendMode("add", "premultiplied")
 
         love.graphics.draw(self.normalMap)
 
@@ -146,8 +148,12 @@ function world:renderTextures()
     for l = 1, self.d do
         for i = 1, #self.bodies[l] do
             local body = self.bodies[l][i]
+
+            if not body then goto next end
     
-            body:renderTexture()
+            body:renderTexture(self)
+
+            ::next::
         end
     end
 
@@ -178,11 +184,15 @@ function world:renderNormals()
                 for i = 1, #self.bodies[l] do
                     local body = self.bodies[l][i]
         
-                    if (body:inRange(px, py, light.range)) then
+                    if not body then goto next end
 
+                    if (body:inRange(px, py, light.range)) then
+                        
                         body:renderNormal(px, py, 1, 0, 0)
 
                     end
+
+                    ::next::
                 end    
             end
         end
@@ -207,8 +217,12 @@ function world:renderGlow(dt)
     for l = 1, self.d do
         for o = 1, #self.bodies[l] do
             local body = self.bodies[l][o]
+
+            if not body then goto next end
     
             body:renderGlow(self.glowTick)
+
+            ::next::
         end
     end
 
@@ -223,6 +237,7 @@ function world:update(dt)
     self:renderNormals()
     self:renderGlow(dt)
     self:normalizeLights()
+
 
     love.graphics.push()
 
@@ -253,7 +268,6 @@ function world:update(dt)
     love.graphics.pop()
 
     love.graphics.scale(1, 1)
-
 end
 
 -- draws world
@@ -327,15 +341,26 @@ end
 
 -- removes body
 function world:removeBody(body) 
-    table.remove(self.bodies[body.layer][body.index], body)
+    -- self.bodies[body.layer][body.index] = nil
+    if not body then return end
+
+    self.bodies[body.layer][body.index] = nil
 end
 
 -- translates screen coord to scaled coord
 function world:translateScreenCoord(x, y)
     local x = (x / self.scale.x / _Screen.aspectRatio.x) - self.translation.x
-    local y = (y / self.scale.x / _Screen.aspectRatio.y) - self.translation.y
+    local y = (y / self.scale.y / _Screen.aspectRatio.y) - self.translation.y
 
     return x , y
+end
+
+-- scales screen coord
+function world:scaleScreenCoord(x, y)
+    local x = x * self.scale.x * _Screen.aspectRatio.x
+    local y = y * self.scale.y * _Screen.aspectRatio.y
+
+    return x, y
 end
 
 -- sets buffer window

@@ -16,6 +16,10 @@ function world:init(w, h, d, ambience)
 
     -- rendering
     self.lightWorld = _Lighting.LightWorld(ambience or {0, 0, 0}, self.d)
+
+
+    -- event handlers
+    local collision = globalEventHandler:newEvent("staticCollision", function(id1, id2, dir) return {id1, id2, dir} end)
 end
 
 function world:onadd()
@@ -68,10 +72,12 @@ function world:update(dt)
         for id, ent in pairs(self.entities[l]) do
 
             -- remove entity
-            if ent.remove then 
+            if ent.remove and not ent.removed then                
                 ent:onremove()
+                ent.removed = true
                 self.entities[l][id] = nil 
                 self.entities[id] = nil
+
                 goto next 
             end
 
@@ -87,6 +93,16 @@ end
 -- draws world
 function world:draw()
     self.lightWorld:draw()
+
+    for l = 1, self.d do
+        for id, ent in pairs(self.entities[l]) do
+
+            if ent.draw then ent:draw(dt) end
+    
+            ::next::
+        end
+    end
+
 end
 
 -- shortcuts
@@ -95,5 +111,6 @@ function world:translate(x, y) self.lightWorld:setTranslation(x, y) end
 function world:adjustScreenSize(w, h) self.lightWorld:setBuffers(w, h) end
 function world:setScale(sx, sy) self.lightWorld:setScale(sx, sy) end
 function world:convertScreenCoord(x, y) return self.lightWorld:translateScreenCoord(x, y) end
+function world:scaleScreenCoord(x, y) return self.lightWorld:scaleScreenCoord(x, y) end
 
 return world

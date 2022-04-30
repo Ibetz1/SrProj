@@ -18,6 +18,10 @@ function comp:init(image, normal, glow, settings)
     self:setImage(image)
 end
 
+function comp:onremove()
+    local lw = self.body:fadeKill()
+end
+
 function comp:onadd()
     self.parent.world.lightWorld:addBody(self.body)
 end

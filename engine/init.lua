@@ -14,6 +14,9 @@ _Constants = {
     Gravity = 100,
     Tilesize = 16
 }
+
+_Game = {}
+
 -- imports directory
 local function importDir(settings)
     local content = love.filesystem.getDirectoryItems(settings["path"])

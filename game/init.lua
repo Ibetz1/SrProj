@@ -1,4 +1,9 @@
-local controller = require("game/components/Controller")
+local BodyController = require("game.components.BodyController")
+local BodyDetector = require("game.components.BodyDetector")
+local BodySelector = require("game.components.BodySelector")
+local BodyTweener = require("game.components.BodyTweener")
+
+_Game.selected = nil
 
 local game = {
     entities = {
@@ -18,8 +23,15 @@ local game = {
                     {-1, 1}, {-1, 1}
                 }
             }))
+
             ent:addComponent(_Components.RigidBody())
             ent:addComponent(_Components.PhysicsGridUpdater())
+
+            -- game components
+            ent:addComponent(BodyTweener(options.tweenSpeed or 0.5))
+            ent:addComponent(BodySelector())
+            ent:addComponent(BodyController())
+
 
             return ent
         end,
@@ -47,6 +59,22 @@ local game = {
             }))
 
             ent:addComponent(_Components.RigidBody())
+            ent:addComponent(_Components.PhysicsGridUpdater())
+
+            return ent
+        end,
+
+        goal = function(_, x, y, w, h, options)
+            local options = options or {}
+
+            local ent = _Internal.Entity()
+
+
+            ent:addComponent(_Components.PhysicsBody(x, y, w, h, {
+                static = true
+            }))
+
+            ent:addComponent(BodyDetector)
             ent:addComponent(_Components.PhysicsGridUpdater())
 
             return ent
@@ -123,6 +151,7 @@ game.constructors = {
         local upPlayerGlow = imageQuad(_Assets.tileset, 80, 48, 16, 16)
 
         local floorTile = imageQuad(_Assets.tileset, 0, 32, 16, 16)
+        local floorNormal = imageQuad(_Assets.tileset, 32, 32, 16, 16)
         
         local goalTex = imageQuad(_Assets.tileset, 0, 48, 16, 16)
         local goalNorm = imageQuad(_Assets.tileset, 32, 48, 16, 16)
@@ -133,8 +162,17 @@ game.constructors = {
                                     batchedImage(leftPlayerNorm, 1, 1),
                                     batchedImage(leftPlayerGlow, 1, 1), 
                                     {
-                                       ox = 0, oy = 3
+                                       ox = 0, oy = 3, ww = tw * _Constants.Tilesize, wh = th * _Constants.Tilesize
                                     })
+
+        local block = game.entities:block(120, 32, 16, 13,                                   
+        batchedImage(leftPlayerTex, 1, 1),
+        batchedImage(leftPlayerNorm, 1, 1),
+        batchedImage(leftPlayerGlow, 1, 1), 
+        {
+            ox = 0, oy = 3, ww = tw * _Constants.Tilesize, wh = th * _Constants.Tilesize
+        })
+
 
         local topWall = game.entities:wall(0, 0, sideWallTex, sideWallNorm, nil, tw, 1,
         {
@@ -156,18 +194,21 @@ game.constructors = {
             ox = 0, oy = 0
         })
 
-        local floor = game.entities:tiledImage(0, 0, floorTile, nil, nil, tw, th)
+        bottomWall.onremove = f
+
+        local floor = game.entities:tiledImage(0, 0, floorTile, batchedImage(floorNormal, 1, 1), nil, tw, th)
         local goalTex = game.entities:quadedImage(math.floor(tw / 2) * _Constants.Tilesize, math.floor(th / 2) * _Constants.Tilesize, 16, 16, 
                                         batchedImage(goalTex, 1, 1), 
                                         batchedImage(goalNorm, 1, 1), 
                                         batchedImage(goalGlow, 1, 1))
-
+        local goalDetector = game.entities:goal(math.floor(tw / 2) * _Constants.Tilesize, math.floor(th / 2) * _Constants.Tilesize, 16, 16)
         
         world:addEntity(floor, 1)
         world:addEntity(goalTex, 1)
+        world:addEntity(goalDetector, 2)
 
-        player:addComponent(controller())
         world:addEntity(player, 2)
+        world:addEntity(block, 2)
 
         -- walls
         world:addEntity(topWall, 2)
@@ -178,7 +219,7 @@ game.constructors = {
         world.lightWorld:setBufferWindow(tw * _Constants.Tilesize * world.lightWorld.scale.x, 
                                         ((th) * _Constants.Tilesize * world.lightWorld.scale.y))
 
-        local light = _Lighting.Light((tw / 2) * _Constants.Tilesize, (th / 2) * _Constants.Tilesize, 200, {0.5, 1, 1})
+        local light = _Lighting.Light((tw / 2) * _Constants.Tilesize, (th / 2) * _Constants.Tilesize, 200, {0.0, 0.5, 0.5})
         world.lightWorld:addLight(light)
     end
 }

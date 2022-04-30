@@ -20,7 +20,8 @@ function comp:update(dt)
 
     for _, id in pairs(cast) do
         local ent = world:getEntity(id)
-        
+
+        if not ent then goto next end
         if not ent.texture then goto next end
         if not ent.Body then goto next end
 

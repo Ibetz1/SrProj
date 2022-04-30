@@ -14,6 +14,8 @@ end
 function comp:update()
     local body = self.parent.Body
 
+    if _Game.selected ~= self.parent.id then return end
+
     if love.keyboard.isDown("w") then body:impulse(100, -1, "y") end
     if love.keyboard.isDown("a") then body:impulse(100, -1, "x") end
     if love.keyboard.isDown("s") then body:impulse(100, 1, "y") end
