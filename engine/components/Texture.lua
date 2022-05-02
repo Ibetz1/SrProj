@@ -11,6 +11,7 @@ function comp:init(image, normal, glow, settings)
     self.remove = false
     
     self.body = _Lighting.Body(0, 0, 0, 0, settings)
+    self.imageIndex = settings.imageIndex or 1
 
     -- set textures
     self:setGlowMap(glow)

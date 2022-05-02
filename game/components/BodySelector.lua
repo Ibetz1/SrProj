@@ -28,13 +28,16 @@ function comp:update()
     self.hover = aabb(px, py, w, h, mx, my, 0, 0)
     self.parent.texture.body.doGlow = self.hover or _Game.selected == self.parent.id
 
+
+    if _Game.selected == self.parent.id then
+        self.ontrigger()
+    end
+
     if self.hover then
         self.onhover()
 
         if love.mouse.isDown(1) then
             _Game.selected = self.parent.id
-
-            self.ontrigger()
         end
     else
         if love.mouse.isDown(1) and _Game.selected == self.parent.id then

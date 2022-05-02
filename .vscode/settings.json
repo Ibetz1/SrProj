@@ -9,7 +9,8 @@
         "different-requires",
         "undefined-field",
         "undefined-global",
-        "missing-parameter"
+        "missing-parameter",
+        "redundant-return"
     ],
     "Lua.diagnostics.globals": [
         "_INTERNALPATH",

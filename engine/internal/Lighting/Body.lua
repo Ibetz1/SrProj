@@ -119,29 +119,23 @@ function body:renderTexture(world)
 end
 
 -- sets texture
-function body:setTexture(tex, resize, quad)
+function body:setTexture(tex, resize)
     self.texture = tex
 
     if resize then
         self.w, self.h = tex:getWidth(), tex:getHeight()
         self:sizeMatrix(self.w, self.h)
     end
-
-    self.texquad = quad
 end
 
 -- sets normal
-function body:setNormal(normal, quad)
+function body:setNormal(normal)
     self.normal = normal
-
-    self.normquad = quad
 end
 
 -- sets glow map
-function body:setGlow(glow, quad)
+function body:setGlow(glow)
     self.glow = glow
-
-    self.glowquad = quad
 end
 
 -- sets glow color

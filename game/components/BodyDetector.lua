@@ -44,6 +44,8 @@ function comp:update()
 
             world:removeEntity(id)
 
+            _Game.remainingBlocks = _Game.remainingBlocks - 1
+
         end
 
         ::next::

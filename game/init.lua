@@ -2,8 +2,6 @@ local BodyController = require("game.components.BodyController")
 local BodyDetector = require("game.components.BodyDetector")
 local BodySelector = require("game.components.BodySelector")
 
-_Game.selected = nil
-
 local game = {
     entities = {
         block = function(_, x, y, w, h, texture, normal, glow, options)
@@ -14,7 +12,8 @@ local game = {
             ent:addComponent(_Components.Texture(texture, normal, glow, {
                 w = w, h = h,
                 offset = Vector(options.ox or 0, options.oy or 0),
-                occlude = true
+                occlude = true,
+                imageIndex = options.imageIndex
             }))
 
             ent:addComponent(_Components.PhysicsBody(x, y, w, h, {
@@ -30,27 +29,24 @@ local game = {
             -- on hover
             function()
                 if not glow then return end
-                local tex = ent.texture.body
-                
+                local tex = ent.texture
+                local gl = _Textures.player[ent.texture.imageIndex].GlowHover
 
-
-                if tex.glow ~= glow and _Game.selected ~= ent.id then
-                    tex.glow = glow
-
+                if tex.body.glow ~= gl and _Game.selected ~= ent.id then
+                    tex:setGlowMap(gl)
                 end
 
             end,
 
             -- on selected
             function()
-                local gl = options.selectedGlow
-                if not gl then return end
+                local tex = ent.texture
+                local gl = _Textures.player[ent.texture.imageIndex].GlowSelect
 
-                local tex = ent.texture.body
-
-                if tex.glow ~= gl then
-                    tex.glow = gl
+                if tex.body.glow ~= gl then
+                    tex:setGlowMap(gl)
                 end
+
             end)
             
             ent:addComponent(selector)
@@ -158,7 +154,10 @@ local game = {
 
 game.constructors = {
     gameWorld1 = function(_, world, tw, th)
-        
+        _Game.selected = nil
+        _Game.remainingRotations = 1
+        _Game.remainingBlocks = 4
+
         _Textures = {
 
         sideWallTex = imageQuad(_Assets.tileset, 0, 0, 16, 32),
@@ -167,12 +166,12 @@ game.constructors = {
         frontWallNorm = imageQuad(_Assets.tileset, 32, 0, 16, 16),
         
         player = {
-            -- ldown
+            -- right
             {
-                Tex = batchedImage(imageQuad(_Assets.tileset, 16, 0, 16, 16), 1, 1),
-                Norm = batchedImage(imageQuad(_Assets.tileset, 48, 0, 16, 16), 1, 1),
-                GlowHover = batchedImage(imageQuad(_Assets.tileset, 80, 0, 16, 16), 1, 1),
-                GlowSelect = batchedImage(imageQuad(_Assets.tileset, 96, 0, 16, 16), 1, 1),
+                Tex = batchedImage(imageQuad(_Assets.tileset, 16, 32, 16, 16), 1, 1),
+                Norm = batchedImage(imageQuad(_Assets.tileset, 48, 32, 16, 16), 1, 1),
+                GlowHover = batchedImage(imageQuad(_Assets.tileset, 80, 32, 16, 16), 1, 1),
+                GlowSelect = batchedImage(imageQuad(_Assets.tileset, 96, 32, 16, 16), 1, 1),
             },
 
             -- down
@@ -183,12 +182,12 @@ game.constructors = {
                 GlowSelect = batchedImage(imageQuad(_Assets.tileset, 96, 16, 16, 16), 1, 1),
             },
 
-            -- right
+            -- left
             {
-                Tex = batchedImage(imageQuad(_Assets.tileset, 16, 32, 16, 16), 1, 1),
-                Norm = batchedImage(imageQuad(_Assets.tileset, 48, 32, 16, 16), 1, 1),
-                GlowHover = batchedImage(imageQuad(_Assets.tileset, 80, 32, 16, 16), 1, 1),
-                GlowSelect = batchedImage(imageQuad(_Assets.tileset, 96, 32, 16, 16), 1, 1),
+                Tex = batchedImage(imageQuad(_Assets.tileset, 16, 0, 16, 16), 1, 1),
+                Norm = batchedImage(imageQuad(_Assets.tileset, 48, 0, 16, 16), 1, 1),
+                GlowHover = batchedImage(imageQuad(_Assets.tileset, 80, 0, 16, 16), 1, 1),
+                GlowSelect = batchedImage(imageQuad(_Assets.tileset, 96, 0, 16, 16), 1, 1),
             },
 
             -- up
@@ -210,65 +209,82 @@ game.constructors = {
 
         }
 
-        globalEventHandler:newEvent("rotate", function() return true end)
-
-        local block1 = game.entities:block((tw - 3) * 16, (th - 3) * 16, 16, 13,                                   
+        globalEventHandler:newEvent("rotate", function(dir) return dir end)
+        
+        -- blocks
+        local block1 = game.entities:block(32, 48, 16, 13,                                   
                                     _Textures.player[1].Tex,
                                     _Textures.player[1].Norm,
                                     _Textures.player[1].GlowHover, 
                                     {
-                                       ox = 0, oy = 3, ww = tw * _Constants.Tilesize, wh = th * _Constants.Tilesize, 
-                                       selectedGlow = _Textures.player[1].GlowSelect, direction = {-1, 0}
+                                        ox = 0, oy = 3, ww = tw * _Constants.Tilesize, wh = th * _Constants.Tilesize, 
+                                        selectedGlow = _Textures.player[1].GlowSelect, direction = {1, 0}, imageIndex = 1
                                     })
 
-        local block2 = game.entities:block(32, 48, 16, 13,                                   
+        local block2 = game.entities:block((tw - 3) * 16, 48, 16, 13,                                   
                                     _Textures.player[2].Tex,
                                     _Textures.player[2].Norm,
                                     _Textures.player[2].GlowHover, 
                                     {
                                         ox = 0, oy = 3, ww = tw * _Constants.Tilesize, wh = th * _Constants.Tilesize, 
-                                        selectedGlow = _Textures.player[2].GlowSelect, direction = {1, 0}
+                                        selectedGlow = _Textures.player[2].GlowSelect, direction = {0, 1}, imageIndex = 2
                                     })
 
-        local block3 = game.entities:block((tw - 3) * 16, 48, 16, 13,                                   
+        
+
+
+
+
+        local block3 = game.entities:block((tw - 3) * 16, (th - 3) * 16, 16, 13,                                   
                                     _Textures.player[3].Tex,
                                     _Textures.player[3].Norm,
                                     _Textures.player[3].GlowHover, 
                                     {
-                                        ox = 0, oy = 3, ww = tw * _Constants.Tilesize, wh = th * _Constants.Tilesize, 
-                                        selectedGlow = _Textures.player[3].GlowSelect, direction = {0, 1}
+                                       ox = 0, oy = 3, ww = tw * _Constants.Tilesize, wh = th * _Constants.Tilesize, 
+                                       selectedGlow = _Textures.player[4].GlowSelect, direction = {-1, 0}, imageIndex = 3
                                     })
-        
+
         local block4 = game.entities:block(32, (th - 3) * 16, 16, 13,                                   
                                     _Textures.player[4].Tex,
                                     _Textures.player[4].Norm,
                                     _Textures.player[4].GlowHover, 
                                     {
                                         ox = 0, oy = 3, ww = tw * _Constants.Tilesize, wh = th * _Constants.Tilesize, 
-                                        selectedGlow = _Textures.player[4].GlowSelect, direction = {0, -1}
+                                        selectedGlow = _Textures.player[4].GlowSelect, direction = {0, -1}, imageIndex = 4
+                                    })
+        
+        -- walls
+        local topWall = game.entities:wall(0, 0, 
+                                    _Textures.sideWallTex, 
+                                    _Textures.sideWallNorm, 
+                                    nil, tw, 1,
+                                    {
+                                        ox = 0, oy = 16, oh = 16, ch = 29
                                     })
 
+        local bottomWall = game.entities:wall(0, (th - 1) * _Constants.Tilesize, 
+                                    _Textures.frontWallTex,  
+                                    _Textures.frontWallNorm, 
+                                    nil, tw, 1,
+                                    {
+                                        ox = 0, oy = 16, oh = 16
+                                    })
 
+        local leftWall = game.entities:wall(0, 0, 
+                                    _Textures.frontWallTex, 
+                                    _Textures.frontWallNorm, 
+                                    nil, 1, th,
+                                    {
+                                        ox = 0, oy = 0
+                                    })
 
-        local topWall = game.entities:wall(0, 0, _Textures.sideWallTex, _Textures.sideWallNorm, nil, tw, 1,
-        {
-            ox = 0, oy = 16, oh = 16, ch = 29
-        })
-
-        local bottomWall = game.entities:wall(0, (th - 1) * _Constants.Tilesize, _Textures.frontWallTex,  _Textures.frontWallNorm, nil, tw, 1,
-        {
-            ox = 0, oy = 16, oh = 16
-        })
-
-        local leftWall = game.entities:wall(0, 0, _Textures.frontWallTex, _Textures.frontWallNorm, nil, 1, th,
-        {
-            ox = 0, oy = 0
-        })
-
-        local rightWall = game.entities:wall(_Constants.Tilesize * (tw - 1), 0, _Textures.frontWallTex,  _Textures.frontWallNorm, nil, 1, th,
-        {
-            ox = 0, oy = 0
-        })
+        local rightWall = game.entities:wall(_Constants.Tilesize * (tw - 1), 0, 
+                                    _Textures.frontWallTex,  
+                                    _Textures.frontWallNorm, 
+                                    nil, 1, th,
+                                    {
+                                        ox = 0, oy = 0
+                                    })
 
         local floor = game.entities:tiledImage(0, 0, _Textures.floorTile, _Textures.floorNormal, nil, tw, th)
         local goalTex = game.entities:quadedImage(math.floor(tw / 2) * _Constants.Tilesize, math.floor(th / 2) * _Constants.Tilesize, 16, 16, 
