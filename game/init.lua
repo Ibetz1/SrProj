@@ -1,7 +1,6 @@
 local BodyController = require("game.components.BodyController")
 local BodyDetector = require("game.components.BodyDetector")
 local BodySelector = require("game.components.BodySelector")
-local BodyTweener = require("game.components.BodyTweener")
 
 _Game.selected = nil
 
@@ -26,9 +25,6 @@ local game = {
 
             ent:addComponent(_Components.RigidBody())
             ent:addComponent(_Components.PhysicsGridUpdater())
-
-            -- game components
-            ent:addComponent(BodyTweener(options.tweenSpeed or 0.5))
 
             local selector = BodySelector(
             -- on hover
@@ -162,104 +158,123 @@ local game = {
 
 game.constructors = {
     gameWorld1 = function(_, world, tw, th)
-
-        local sideWallTex = imageQuad(_Assets.tileset, 0, 0, 16, 32)
-        local sideWallNorm = imageQuad(_Assets.tileset, 32, 0, 16, 32)
-        local frontWallTex = imageQuad(_Assets.tileset, 0, 0, 16, 16)
-        local fromWallNorm = imageQuad(_Assets.tileset, 32, 0, 16, 16)
-
-        local leftPlayerTex = imageQuad(_Assets.tileset, 16, 0, 16, 16)
-        local leftPlayerNorm = imageQuad(_Assets.tileset, 48, 0, 16, 16)
-        local leftPlayerGlowHover = imageQuad(_Assets.tileset, 80, 0, 16, 16)
-        local leftPlayerGlowSelect = imageQuad(_Assets.tileset, 96, 0, 16, 16)
-
-        local downPlayerTex = imageQuad(_Assets.tileset, 16, 16, 16, 16)
-        local downPlayerNorm = imageQuad(_Assets.tileset, 48, 16, 16, 16)
-        local downPlayerGlowHover = imageQuad(_Assets.tileset, 80, 16, 16, 16)
-        local downPlayerGlowSelect = imageQuad(_Assets.tileset, 96, 16, 16, 16)
-
-        local rightPlayerTex = imageQuad(_Assets.tileset, 16, 32, 16, 16)
-        local rightPlayerNorm = imageQuad(_Assets.tileset, 48, 32, 16, 16)
-        local rightPlayerGlowHover = imageQuad(_Assets.tileset, 80, 32, 16, 16)
-        local rightPlayerGlowSelect = imageQuad(_Assets.tileset, 96, 32, 16, 16)
-
-        local upPlayerTex = imageQuad(_Assets.tileset, 16, 48, 16, 16)
-        local upPlayerNorm = imageQuad(_Assets.tileset, 48, 48, 16, 16)
-        local upPlayerGlowHover = imageQuad(_Assets.tileset, 80, 48, 16, 16)
-        local upPlayerGlowSelect = imageQuad(_Assets.tileset, 96, 48, 16, 16)
-
-        local floorTile = imageQuad(_Assets.tileset, 0, 32, 16, 16)
-        local floorNormal = imageQuad(_Assets.tileset, 32, 32, 16, 16)
         
-        local goalTex = imageQuad(_Assets.tileset, 0, 48, 16, 16)
-        local goalNorm = imageQuad(_Assets.tileset, 32, 48, 16, 16)
-        local goalGlow = imageQuad(_Assets.tileset, 64, 48, 16, 16)
+        _Textures = {
 
-        local playerLeft = game.entities:block((tw - 3) * 16, (th - 3) * 16, 16, 13,                                   
-                                    batchedImage(leftPlayerTex, 1, 1),
-                                    batchedImage(leftPlayerNorm, 1, 1),
-                                    batchedImage(leftPlayerGlowHover, 1, 1), 
+        sideWallTex = imageQuad(_Assets.tileset, 0, 0, 16, 32),
+        sideWallNorm = imageQuad(_Assets.tileset, 32, 0, 16, 32),
+        frontWallTex = imageQuad(_Assets.tileset, 0, 0, 16, 16),
+        frontWallNorm = imageQuad(_Assets.tileset, 32, 0, 16, 16),
+        
+        player = {
+            -- ldown
+            {
+                Tex = batchedImage(imageQuad(_Assets.tileset, 16, 0, 16, 16), 1, 1),
+                Norm = batchedImage(imageQuad(_Assets.tileset, 48, 0, 16, 16), 1, 1),
+                GlowHover = batchedImage(imageQuad(_Assets.tileset, 80, 0, 16, 16), 1, 1),
+                GlowSelect = batchedImage(imageQuad(_Assets.tileset, 96, 0, 16, 16), 1, 1),
+            },
+
+            -- down
+            {
+                Tex = batchedImage(imageQuad(_Assets.tileset, 16, 16, 16, 16), 1, 1),
+                Norm = batchedImage(imageQuad(_Assets.tileset, 48, 16, 16, 16), 1, 1),
+                GlowHover = batchedImage(imageQuad(_Assets.tileset, 80, 16, 16, 16), 1, 1),
+                GlowSelect = batchedImage(imageQuad(_Assets.tileset, 96, 16, 16, 16), 1, 1),
+            },
+
+            -- right
+            {
+                Tex = batchedImage(imageQuad(_Assets.tileset, 16, 32, 16, 16), 1, 1),
+                Norm = batchedImage(imageQuad(_Assets.tileset, 48, 32, 16, 16), 1, 1),
+                GlowHover = batchedImage(imageQuad(_Assets.tileset, 80, 32, 16, 16), 1, 1),
+                GlowSelect = batchedImage(imageQuad(_Assets.tileset, 96, 32, 16, 16), 1, 1),
+            },
+
+            -- up
+            {
+                Tex = batchedImage(imageQuad(_Assets.tileset, 16, 48, 16, 16), 1, 1),
+                Norm = batchedImage(imageQuad(_Assets.tileset, 48, 48, 16, 16), 1, 1),
+                GlowHover = batchedImage(imageQuad(_Assets.tileset, 80, 48, 16, 16), 1, 1),
+                GlowSelect = batchedImage(imageQuad(_Assets.tileset, 96, 48, 16, 16), 1, 1),
+            },
+        },
+
+
+        floorTile = imageQuad(_Assets.tileset, 0, 32, 16, 16),
+        floorNormal = imageQuad(_Assets.tileset, 32, 32, 16, 16),
+        
+        goalTex = imageQuad(_Assets.tileset, 0, 48, 16, 16),
+        goalNorm = imageQuad(_Assets.tileset, 32, 48, 16, 16),
+        goalGlow = imageQuad(_Assets.tileset, 64, 48, 16, 16)
+
+        }
+
+        globalEventHandler:newEvent("rotate", function() return true end)
+
+        local block1 = game.entities:block((tw - 3) * 16, (th - 3) * 16, 16, 13,                                   
+                                    _Textures.player[1].Tex,
+                                    _Textures.player[1].Norm,
+                                    _Textures.player[1].GlowHover, 
                                     {
                                        ox = 0, oy = 3, ww = tw * _Constants.Tilesize, wh = th * _Constants.Tilesize, 
-                                       selectedGlow = batchedImage(leftPlayerGlowSelect, 1, 1), direction = {-1, 0}
+                                       selectedGlow = _Textures.player[1].GlowSelect, direction = {-1, 0}
                                     })
 
-        local playerRight = game.entities:block(32, 48, 16, 13,                                   
-                                    batchedImage(rightPlayerTex, 1, 1),
-                                    batchedImage(rightPlayerNorm, 1, 1),
-                                    batchedImage(rightPlayerGlowHover, 1, 1), 
+        local block2 = game.entities:block(32, 48, 16, 13,                                   
+                                    _Textures.player[2].Tex,
+                                    _Textures.player[2].Norm,
+                                    _Textures.player[2].GlowHover, 
                                     {
                                         ox = 0, oy = 3, ww = tw * _Constants.Tilesize, wh = th * _Constants.Tilesize, 
-                                        selectedGlow = batchedImage(rightPlayerGlowSelect, 1, 1), direction = {1, 0}
+                                        selectedGlow = _Textures.player[2].GlowSelect, direction = {1, 0}
                                     })
 
-        local playerDown = game.entities:block((tw - 3) * 16, 48, 16, 13,                                   
-                                    batchedImage(downPlayerTex, 1, 1),
-                                    batchedImage(downPlayerNorm, 1, 1),
-                                    batchedImage(downPlayerGlowHover, 1, 1), 
+        local block3 = game.entities:block((tw - 3) * 16, 48, 16, 13,                                   
+                                    _Textures.player[3].Tex,
+                                    _Textures.player[3].Norm,
+                                    _Textures.player[3].GlowHover, 
                                     {
                                         ox = 0, oy = 3, ww = tw * _Constants.Tilesize, wh = th * _Constants.Tilesize, 
-                                        selectedGlow = batchedImage(downPlayerGlowSelect, 1, 1), direction = {0, 1}
+                                        selectedGlow = _Textures.player[3].GlowSelect, direction = {0, 1}
                                     })
         
-        local playerUp = game.entities:block(32, (th - 3) * 16, 16, 13,                                   
-                                    batchedImage(upPlayerTex, 1, 1),
-                                    batchedImage(upPlayerNorm, 1, 1),
-                                    batchedImage(upPlayerGlowHover, 1, 1), 
+        local block4 = game.entities:block(32, (th - 3) * 16, 16, 13,                                   
+                                    _Textures.player[4].Tex,
+                                    _Textures.player[4].Norm,
+                                    _Textures.player[4].GlowHover, 
                                     {
                                         ox = 0, oy = 3, ww = tw * _Constants.Tilesize, wh = th * _Constants.Tilesize, 
-                                        selectedGlow = batchedImage(upPlayerGlowSelect, 1, 1), direction = {0, -1}
+                                        selectedGlow = _Textures.player[4].GlowSelect, direction = {0, -1}
                                     })
 
 
 
-        local topWall = game.entities:wall(0, 0, sideWallTex, sideWallNorm, nil, tw, 1,
+        local topWall = game.entities:wall(0, 0, _Textures.sideWallTex, _Textures.sideWallNorm, nil, tw, 1,
         {
             ox = 0, oy = 16, oh = 16, ch = 29
         })
 
-        local bottomWall = game.entities:wall(0, (th - 1) * _Constants.Tilesize, frontWallTex,  fromWallNorm, nil, tw, 1,
+        local bottomWall = game.entities:wall(0, (th - 1) * _Constants.Tilesize, _Textures.frontWallTex,  _Textures.frontWallNorm, nil, tw, 1,
         {
             ox = 0, oy = 16, oh = 16
         })
 
-        local leftWall = game.entities:wall(0, 0, frontWallTex, fromWallNorm, nil, 1, th,
+        local leftWall = game.entities:wall(0, 0, _Textures.frontWallTex, _Textures.frontWallNorm, nil, 1, th,
         {
             ox = 0, oy = 0
         })
 
-        local rightWall = game.entities:wall(_Constants.Tilesize * (tw - 1), 0, frontWallTex,  fromWallNorm, nil, 1, th,
+        local rightWall = game.entities:wall(_Constants.Tilesize * (tw - 1), 0, _Textures.frontWallTex,  _Textures.frontWallNorm, nil, 1, th,
         {
             ox = 0, oy = 0
         })
 
-        bottomWall.onremove = f
-
-        local floor = game.entities:tiledImage(0, 0, floorTile, batchedImage(floorNormal, 1, 1), nil, tw, th)
+        local floor = game.entities:tiledImage(0, 0, _Textures.floorTile, _Textures.floorNormal, nil, tw, th)
         local goalTex = game.entities:quadedImage(math.floor(tw / 2) * _Constants.Tilesize, math.floor(th / 2) * _Constants.Tilesize, 16, 16, 
-                                        batchedImage(goalTex, 1, 1), 
-                                        batchedImage(goalNorm, 1, 1), 
-                                        batchedImage(goalGlow, 1, 1))
+                                        batchedImage(_Textures.goalTex, 1, 1), 
+                                        batchedImage(_Textures.goalNorm, 1, 1), 
+                                        batchedImage(_Textures.goalGlow, 1, 1))
         local goalDetector = game.entities:goal(math.floor(tw / 2) * _Constants.Tilesize, math.floor(th / 2) * _Constants.Tilesize, 16, 16)
         
         world:addEntity(floor, 1)
@@ -267,10 +282,10 @@ game.constructors = {
         world:addEntity(goalDetector, 2)
 
         -- player
-        world:addEntity(playerLeft, 2)
-        world:addEntity(playerRight, 2)
-        world:addEntity(playerDown, 2)
-        world:addEntity(playerUp, 2)
+        world:addEntity(block1, 2)
+        world:addEntity(block2, 2)
+        world:addEntity(block3, 2)
+        world:addEntity(block4, 2)
 
         -- walls
         world:addEntity(topWall, 2)

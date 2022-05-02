@@ -20,6 +20,7 @@ function world:init(w, h, d, ambience)
 
     -- event handlers
     globalEventHandler:newEvent("staticCollision", function(id1, id2, dir) return {id1, id2, dir} end)
+    globalEventHandler:newEvent("collision", function(id1, id2, dir) return {id1, id2, dir} end)
 end
 
 function world:onadd()
