@@ -76,6 +76,16 @@ function world:renderLights(dt)
 
                         body:renderShadow(px, py, light.range, ox, oy, -self.translation.x, -self.translation.y)
                         
+                        ::next::
+                    end
+
+                    for o = 1, #self.bodies[l] do
+
+                        local body = self.bodies[l][o]
+
+                        if not body or not body.occlude then goto next end
+                        if not body:inRange(px, py, light.range) and self.checkRange then goto next end
+
                         local w, h = body.w, body.h
 
                         if body.texture then w, h = body.texture:getWidth(), body.texture:getHeight()end

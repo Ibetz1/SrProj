@@ -278,8 +278,14 @@ game.constructors = {
         world:addEntity(leftWall, 2)
         world:addEntity(rightWall, 2)
 
+        world:setScale(
+            _Screen.smallScreenSize.y / (th * _Constants.Tilesize),
+            _Screen.smallScreenSize.y / (th * _Constants.Tilesize)
+        )
+
         world.lightWorld:setBufferWindow(tw * _Constants.Tilesize * world.lightWorld.scale.x, 
                                         ((th) * _Constants.Tilesize * world.lightWorld.scale.y))
+
 
         -- lighting
         world.lightWorld:addLight(_Lighting.Light(16, 32, 100, {0.5, 0.2, 1}))
@@ -288,7 +294,7 @@ game.constructors = {
         world.lightWorld:addLight(_Lighting.Light((tw - 1) * 16, (th - 1) * 16, 100, {0.5, 0, 1}))
         world.lightWorld:addLight(_Lighting.Light((tw * 16) / 2, (th * 16) / 2, 100, {0.2, 0.2, 1}))
                                 
-        -- offset
+        -- translation
         world.lightWorld:center()
     end
 }

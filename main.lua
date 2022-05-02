@@ -3,7 +3,6 @@ require("engine")
 local game = require("game")
 
 local stack, world, index = game(16, 16, 2, {0.2, 0.2, 0.2})
-world:setScale(3, 3)
 game.constructors:gameWorld1(world, 11, 11)
 
 love.window.setVSync(0)
@@ -31,7 +30,6 @@ function love.keypressed(key)
 
     if key == "r" then
         stack, world, index = game(16, 16, 2, {0.2, 0.2, 0.2})
-        world:setScale(3, 3)
         game.constructors:gameWorld1(world, 11, 11)
     end
 end
