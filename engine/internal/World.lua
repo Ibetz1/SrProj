@@ -75,7 +75,7 @@ function world:update(dt)
             if ent.remove and not ent.removed then                
                 ent:onremove()
                 ent.removed = true
-                self.entities[l][id] = nil 
+                self.entities[l][id] = nil
                 self.entities[id] = nil
 
                 goto next 

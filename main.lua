@@ -2,7 +2,7 @@ love.graphics.setDefaultFilter("nearest", "nearest")
 require("engine")
 local game = require("game")
 
-local stack, world, index = game(16, 16, 2, {0.3, 0.3, 0.3})
+local stack, world, index = game(16, 16, 2, {0.2, 0.2, 0.2})
 
 world:setScale(3, 3)
 
@@ -25,7 +25,7 @@ function love.draw()
 end
 
 function love.keypressed(key)
-    if key == "space" then
+    if key == "f11" then
         _Screen:fullscreen()
         world:adjustScreenSize()
     end

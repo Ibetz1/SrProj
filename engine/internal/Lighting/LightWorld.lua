@@ -19,7 +19,7 @@ function world:init(ambience, d, settings)
     self.glowDir = 1
 
     -- scaling methods
-    self.resolutionScaling = 0.25
+    self.checkRange = true
 
     -- apply settings
     for name, val in pairs(settings or {}) do
@@ -31,19 +31,16 @@ end
 
 -- sets buffers
 function world:setBuffers(w, h)
-    local w, h = w or love.graphics.getWidth(), h or love.graphics.getHeight()
     local bufferWindow = self.bufferWindow or {
-        love.graphics.getWidth(), love.graphics.getHeight()
+        w or love.graphics.getWidth(), h or love.graphics.getHeight()
     }
 
     -- non resolution scaled buffers
-    self.normalBuffer =    love.graphics.newCanvas(w, h)
-    self.normalMap =       love.graphics.newCanvas(w, h)
-    self.texBuffer =       love.graphics.newCanvas(w, h)
+    self.normalBuffer =    love.graphics.newCanvas(bufferWindow[1], bufferWindow[2])
+    self.normalMap =       love.graphics.newCanvas(bufferWindow[1], bufferWindow[2])
+    self.texBuffer =       love.graphics.newCanvas(bufferWindow[1], bufferWindow[2])
     self.drawBuffer =      love.graphics.newCanvas(bufferWindow[1], bufferWindow[2])
-    self.glowBuffer =      love.graphics.newCanvas(w, h)
-
-    w, h = w * _Screen.ResolutionScaling, h * _Screen.ResolutionScaling
+    self.glowBuffer =      love.graphics.newCanvas(bufferWindow[1], bufferWindow[2])
 
     -- resolution scaled buffers
     self.lightingBuffer =  love.graphics.newCanvas(w, h)
@@ -53,17 +50,17 @@ end
 -- renders lighting buffer
 function world:renderLights(dt)
     love.graphics.setCanvas(self.lightingBuffer)
-        love.graphics.clear(0, 0, 0)
+        love.graphics.clear(0, 0, 0, 0)
 
         love.graphics.origin()
-        local tx, ty = self.translation.x * _Screen.ResolutionScaling, self.translation.y * _Screen.ResolutionScaling
+        local tx, ty = self.translation.x, self.translation.y
 
         -- render each light
         for i = 1, #self.lights do
             local light = self.lights[i]
             local px, py = light.position:unpack()
 
-            local ox, oy = (-px + light.range) * _Screen.ResolutionScaling, (-py + light.range) * _Screen.ResolutionScaling
+            local ox, oy = (-px + light.range), (-py + light.range)
 
             -- render occlusion
             light:updateShadowBuffer(function(ox, oy)
@@ -71,27 +68,22 @@ function world:renderLights(dt)
                 for l = 1, self.d do
                     for o = 1, #self.bodies[l] do
                         local body = self.bodies[l][o]
-                        
 
                         -- update shadow buffer
-                        if not body then goto next end
-                        if not body:inRange(px, py, light.range) or not body.occlude then goto next end
-    
-                        body:renderShadow(px, py, light.range * _Screen.ResolutionScaling, ox, oy, -self.translation.x, -self.translation.y)
-    
+                        if not body or not body.occlude then goto next end
+                        if not body:inRange(px, py, light.range) and self.checkRange then goto next end
+
+                        body:renderShadow(px, py, light.range, ox, oy, -self.translation.x, -self.translation.y)
                         
                         local w, h = body.w, body.h
 
-                        if body.texture then
-                            w, h = body.texture:getWidth(), body.texture:getHeight()
-                        end
+                        if body.texture then w, h = body.texture:getWidth(), body.texture:getHeight()end
 
                         love.graphics.setColor(1, 1, 1, body.alpha)
 
-                        love.graphics.rectangle("fill", (body.position.x * _Screen.ResolutionScaling) + ox,
-                                                        (body.position.y * _Screen.ResolutionScaling) + oy, 
-                                                        w * _Screen.ResolutionScaling,
-                                                        h * _Screen.ResolutionScaling)
+                        love.graphics.rectangle("fill", body.position.x + ox, body.position.y + oy, w, h)
+
+                        love.graphics.setColor(1, 1, 1, 1)
 
                         ::next::
                     end
@@ -118,18 +110,20 @@ end
 -- normalizes lighrs
 function world:normalizeLights()
     love.graphics.setCanvas(self.normalBuffer)
+        love.graphics.clear(0, 0, 0)
 
-        love.graphics.setBlendMode("replace", "premultiplied")
-
-        love.graphics.scale((1 / _Screen.ResolutionScaling * self.scale.x), (1 / _Screen.ResolutionScaling * self.scale.y))
-
-        love.graphics.draw(self.lightingBuffer)
-
-        love.graphics.scale(_Screen.ResolutionScaling, _Screen.ResolutionScaling)
 
         love.graphics.setBlendMode("add", "premultiplied")
 
         love.graphics.draw(self.normalMap)
+
+        love.graphics.setBlendMode("multiply", "premultiplied")
+ 
+        love.graphics.draw(self.lightingBuffer)
+
+        love.graphics.setBlendMode("add", "premultiplied")
+
+        love.graphics.draw(self.lightingBuffer)
 
         love.graphics.setBlendMode("alpha")
 
@@ -164,7 +158,7 @@ end
 -- render normal map
 function world:renderNormals()
     love.graphics.setCanvas(self.normalMap)
-    love.graphics.clear(1, 1, 1)
+    love.graphics.clear(0,0,0)
     love.graphics.origin()
     love.graphics.translate(self.translation.x, self.translation.y)
 
@@ -186,7 +180,7 @@ function world:renderNormals()
         
                     if not body then goto next end
 
-                    if (body:inRange(px, py, light.range)) then
+                    if (body:inRange(px, py, light.range)) or self.checkRange == false  then
                         
                         body:renderNormal(px, py, 1, 0, 0)
 
@@ -245,12 +239,12 @@ function world:update(dt)
         love.graphics.origin()
         love.graphics.clear(unpack(self.ambience))
 
+        love.graphics.scale(self.scale.x, self.scale.y)
+
         -- render lighting buffer
         love.graphics.setBlendMode("add")
-
+        
             love.graphics.draw(self.normalBuffer)
-
-            love.graphics.scale(self.scale.x, self.scale.y)
         
         -- render normals and textures
         love.graphics.setBlendMode("multiply", "premultiplied")

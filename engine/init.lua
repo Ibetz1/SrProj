@@ -44,7 +44,6 @@ _Screen = {
     love.graphics.getWidth(),
     love.graphics.getHeight(),
     aspectRatio = Vector(1, 1),
-    ResolutionScaling = 1,
     smallScreenSize = Vector(love.graphics.getWidth(), love.graphics.getHeight()),
     fullScreenSize = Vector(),
     isfullscreen = false,

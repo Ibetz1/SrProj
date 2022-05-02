@@ -12,7 +12,7 @@ vec4 effect(vec4 Color, Image Texture, vec2 textureCoord, vec2 pixelCoord) {
 	}
 	
 	// Direction of the light
-	vec3 LightDir = vec3( dist, 10 );
+	vec3 LightDir = vec3( dist, LightPos.z );
 
 	// Normalize the normal map
 	vec3 N = normalize(NormalMap.rgb * 2.0 - 1.0);

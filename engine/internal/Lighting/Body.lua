@@ -33,16 +33,9 @@ end
 function body:renderShadow(lx, ly, length, ox, oy)
     if not self.occlude then return end
 
-    local rx, ry = _Screen.ResolutionScaling, _Screen.ResolutionScaling
-    local length = length * 1 / rx
+    local px, py = self.position.x, self.position.y
 
-    local px, py = self.position.x * rx, self.position.y * ry
-    local slx, sly = lx * rx, ly * ry
-
-    if aabb(slx, sly, 0, 0, 
-            px + (self.offset.x * _Screen.ResolutionScaling), 
-            py + (self.offset.y * _Screen.ResolutionScaling), 
-            self.w * _Screen.ResolutionScaling, self.h * _Screen.ResolutionScaling) then
+    if aabb(lx, ly, 0, 0, px + (self.offset.x), py + (self.offset.y), self.w, self.h) then
         return
     end
 
@@ -61,8 +54,8 @@ function body:renderShadow(lx, ly, length, ox, oy)
         local x3, y3 = (math.cos(t2) * -2 * length + self.position.x), (math.sin(t2) * -2 * length + self.position.y)
         local x4, y4 = (math.cos(t1) * -2 * length + self.position.x), (math.sin(t1) * -2 * length + self.position.y)
 
-        x1, x2, x3, x4 = x1 * rx, x2 * rx, x3 * rx, x4 * rx
-        y1, y2, y3, y4 = y1 * ry, y2 * ry, y3 * ry, y4 * ry
+        x1, x2, x3, x4 = x1, x2, x3, x4
+        y1, y2, y3, y4 = y1, y2, y3, y4
 
         love.graphics.polygon("fill", x1 + ox, y1 + oy, x2 + ox, y2 + oy, x3 + ox, y3 + oy, x4 + ox, y4 + oy)
     end
@@ -161,7 +154,7 @@ end
 -- checks if light in range
 function body:inRange(lx, ly, d)
     local px, py = self.position.x, self.position.y
-    return aabb(px, py, self.w, self.h, lx - d, ly - d, d * 2, d * 2)
+    return aabb(px, py, self.w, self.h, lx - d, ly - d, d * 2, d * 2) or (self.w == 0 and self.h == 0)
 end
 
 -- sets world
@@ -173,6 +166,8 @@ end
 function body:setPosition(x, y)
 
     self.position.x, self.position.y = x, y
+
+    self.position:floor()
 end
 
 -- resizes body

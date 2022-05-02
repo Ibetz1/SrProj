@@ -122,6 +122,16 @@ local vec2 = {
     end
 }
 
+function vec2:floor()
+    self.x = math.floor(self.x)
+    self.y = math.floor(self.y)
+end
+
+function vec2:ceil()
+    self.x = math.ceil(self.x)
+    self.y = math.ceil(self.y)
+end
+
 function vec2:zero()
     self.x, self.y = 0, 0
 end

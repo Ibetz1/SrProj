@@ -29,8 +29,42 @@ local game = {
 
             -- game components
             ent:addComponent(BodyTweener(options.tweenSpeed or 0.5))
-            ent:addComponent(BodySelector())
-            ent:addComponent(BodyController())
+
+            local selector = BodySelector(
+            -- on hover
+            function()
+                if not glow then return end
+                local tex = ent.texture.body
+                
+
+
+                if tex.glow ~= glow and _Game.selected ~= ent.id then
+                    tex.glow = glow
+
+                end
+
+            end,
+
+            -- on selected
+            function()
+                local gl = options.selectedGlow
+                if not gl then return end
+
+                local tex = ent.texture.body
+
+                if tex.glow ~= gl then
+                    tex.glow = gl
+                end
+            end)
+            
+            ent:addComponent(selector)
+
+            local dx, dy = 0, 0
+            if options.direction then
+                dx, dy = options.direction[1], options.direction[2]
+            end
+
+            ent:addComponent(BodyController(dx, dy))
 
 
             return ent
@@ -136,19 +170,23 @@ game.constructors = {
 
         local leftPlayerTex = imageQuad(_Assets.tileset, 16, 0, 16, 16)
         local leftPlayerNorm = imageQuad(_Assets.tileset, 48, 0, 16, 16)
-        local leftPlayerGlow = imageQuad(_Assets.tileset, 80, 0, 16, 16)
+        local leftPlayerGlowHover = imageQuad(_Assets.tileset, 80, 0, 16, 16)
+        local leftPlayerGlowSelect = imageQuad(_Assets.tileset, 96, 0, 16, 16)
 
         local downPlayerTex = imageQuad(_Assets.tileset, 16, 16, 16, 16)
         local downPlayerNorm = imageQuad(_Assets.tileset, 48, 16, 16, 16)
-        local downPlayerGlow = imageQuad(_Assets.tileset, 80, 16, 16, 16)
+        local downPlayerGlowHover = imageQuad(_Assets.tileset, 80, 16, 16, 16)
+        local downPlayerGlowSelect = imageQuad(_Assets.tileset, 96, 16, 16, 16)
 
         local rightPlayerTex = imageQuad(_Assets.tileset, 16, 32, 16, 16)
         local rightPlayerNorm = imageQuad(_Assets.tileset, 48, 32, 16, 16)
-        local rightPlayerGlow = imageQuad(_Assets.tileset, 80, 32, 16, 16)
+        local rightPlayerGlowHover = imageQuad(_Assets.tileset, 80, 32, 16, 16)
+        local rightPlayerGlowSelect = imageQuad(_Assets.tileset, 96, 32, 16, 16)
 
         local upPlayerTex = imageQuad(_Assets.tileset, 16, 48, 16, 16)
         local upPlayerNorm = imageQuad(_Assets.tileset, 48, 48, 16, 16)
-        local upPlayerGlow = imageQuad(_Assets.tileset, 80, 48, 16, 16)
+        local upPlayerGlowHover = imageQuad(_Assets.tileset, 80, 48, 16, 16)
+        local upPlayerGlowSelect = imageQuad(_Assets.tileset, 96, 48, 16, 16)
 
         local floorTile = imageQuad(_Assets.tileset, 0, 32, 16, 16)
         local floorNormal = imageQuad(_Assets.tileset, 32, 32, 16, 16)
@@ -157,21 +195,42 @@ game.constructors = {
         local goalNorm = imageQuad(_Assets.tileset, 32, 48, 16, 16)
         local goalGlow = imageQuad(_Assets.tileset, 64, 48, 16, 16)
 
-        local player = game.entities:block(32, 32, 16, 13,                                   
+        local playerLeft = game.entities:block((tw - 3) * 16, (th - 3) * 16, 16, 13,                                   
                                     batchedImage(leftPlayerTex, 1, 1),
                                     batchedImage(leftPlayerNorm, 1, 1),
-                                    batchedImage(leftPlayerGlow, 1, 1), 
+                                    batchedImage(leftPlayerGlowHover, 1, 1), 
                                     {
-                                       ox = 0, oy = 3, ww = tw * _Constants.Tilesize, wh = th * _Constants.Tilesize
+                                       ox = 0, oy = 3, ww = tw * _Constants.Tilesize, wh = th * _Constants.Tilesize, 
+                                       selectedGlow = batchedImage(leftPlayerGlowSelect, 1, 1), direction = {-1, 0}
                                     })
 
-        local block = game.entities:block(120, 32, 16, 13,                                   
-        batchedImage(leftPlayerTex, 1, 1),
-        batchedImage(leftPlayerNorm, 1, 1),
-        batchedImage(leftPlayerGlow, 1, 1), 
-        {
-            ox = 0, oy = 3, ww = tw * _Constants.Tilesize, wh = th * _Constants.Tilesize
-        })
+        local playerRight = game.entities:block(32, 48, 16, 13,                                   
+                                    batchedImage(rightPlayerTex, 1, 1),
+                                    batchedImage(rightPlayerNorm, 1, 1),
+                                    batchedImage(rightPlayerGlowHover, 1, 1), 
+                                    {
+                                        ox = 0, oy = 3, ww = tw * _Constants.Tilesize, wh = th * _Constants.Tilesize, 
+                                        selectedGlow = batchedImage(rightPlayerGlowSelect, 1, 1), direction = {1, 0}
+                                    })
+
+        local playerDown = game.entities:block((tw - 3) * 16, 48, 16, 13,                                   
+                                    batchedImage(downPlayerTex, 1, 1),
+                                    batchedImage(downPlayerNorm, 1, 1),
+                                    batchedImage(downPlayerGlowHover, 1, 1), 
+                                    {
+                                        ox = 0, oy = 3, ww = tw * _Constants.Tilesize, wh = th * _Constants.Tilesize, 
+                                        selectedGlow = batchedImage(downPlayerGlowSelect, 1, 1), direction = {0, 1}
+                                    })
+        
+        local playerUp = game.entities:block(32, (th - 3) * 16, 16, 13,                                   
+                                    batchedImage(upPlayerTex, 1, 1),
+                                    batchedImage(upPlayerNorm, 1, 1),
+                                    batchedImage(upPlayerGlowHover, 1, 1), 
+                                    {
+                                        ox = 0, oy = 3, ww = tw * _Constants.Tilesize, wh = th * _Constants.Tilesize, 
+                                        selectedGlow = batchedImage(upPlayerGlowSelect, 1, 1), direction = {0, -1}
+                                    })
+
 
 
         local topWall = game.entities:wall(0, 0, sideWallTex, sideWallNorm, nil, tw, 1,
@@ -184,12 +243,12 @@ game.constructors = {
             ox = 0, oy = 16, oh = 16
         })
 
-        local leftWall = game.entities:wall(0, _Constants.Tilesize, frontWallTex, fromWallNorm, nil, 1, th - 2,
+        local leftWall = game.entities:wall(0, 0, frontWallTex, fromWallNorm, nil, 1, th,
         {
             ox = 0, oy = 0
         })
 
-        local rightWall = game.entities:wall(_Constants.Tilesize * (tw - 1), _Constants.Tilesize, frontWallTex,  fromWallNorm, nil, 1, th - 2,
+        local rightWall = game.entities:wall(_Constants.Tilesize * (tw - 1), 0, frontWallTex,  fromWallNorm, nil, 1, th,
         {
             ox = 0, oy = 0
         })
@@ -207,8 +266,11 @@ game.constructors = {
         world:addEntity(goalTex, 1)
         world:addEntity(goalDetector, 2)
 
-        world:addEntity(player, 2)
-        world:addEntity(block, 2)
+        -- player
+        world:addEntity(playerLeft, 2)
+        world:addEntity(playerRight, 2)
+        world:addEntity(playerDown, 2)
+        world:addEntity(playerUp, 2)
 
         -- walls
         world:addEntity(topWall, 2)
@@ -219,8 +281,13 @@ game.constructors = {
         world.lightWorld:setBufferWindow(tw * _Constants.Tilesize * world.lightWorld.scale.x, 
                                         ((th) * _Constants.Tilesize * world.lightWorld.scale.y))
 
-        local light = _Lighting.Light((tw / 2) * _Constants.Tilesize, (th / 2) * _Constants.Tilesize, 200, {0.0, 0.5, 0.5})
-        world.lightWorld:addLight(light)
+        world.lightWorld:addLight(_Lighting.Light(16, 32, 100, {0.5, 0.2, 1}))
+        world.lightWorld:addLight(_Lighting.Light((tw - 1) * 16, 32, 100, {0.5, 0.2, 1}))
+        world.lightWorld:addLight(_Lighting.Light(16, (th - 1) * 16, 100, {0.5, 0.2, 1}))
+        world.lightWorld:addLight(_Lighting.Light((tw - 1) * 16, (th - 1) * 16, 100, {0.5, 0, 1}))
+
+        world.lightWorld:addLight(_Lighting.Light((tw * 16) / 2, (th * 16) / 2, 100, {0.2, 0.2, 1}))
+                                        
     end
 }
 
