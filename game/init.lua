@@ -64,7 +64,7 @@ local game = {
                 dx, dy = options.direction[1], options.direction[2]
             end
 
-            ent:addComponent(BodyController(dx, dy))
+            ent:addComponent(BodyController(dx, dy, options.ww, options.wh))
 
 
             return ent
@@ -281,13 +281,15 @@ game.constructors = {
         world.lightWorld:setBufferWindow(tw * _Constants.Tilesize * world.lightWorld.scale.x, 
                                         ((th) * _Constants.Tilesize * world.lightWorld.scale.y))
 
+        -- lighting
         world.lightWorld:addLight(_Lighting.Light(16, 32, 100, {0.5, 0.2, 1}))
         world.lightWorld:addLight(_Lighting.Light((tw - 1) * 16, 32, 100, {0.5, 0.2, 1}))
         world.lightWorld:addLight(_Lighting.Light(16, (th - 1) * 16, 100, {0.5, 0.2, 1}))
         world.lightWorld:addLight(_Lighting.Light((tw - 1) * 16, (th - 1) * 16, 100, {0.5, 0, 1}))
-
         world.lightWorld:addLight(_Lighting.Light((tw * 16) / 2, (th * 16) / 2, 100, {0.2, 0.2, 1}))
-                                        
+                                
+        -- offset
+        world.lightWorld:center()
     end
 }
 

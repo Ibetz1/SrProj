@@ -3,49 +3,54 @@ local comp = Object:new({
     name = "Tweener",
     type = "tweening",
     requires = {
-        {"worldBody", "physicsBody"}
+        "physicsBody"
     }
 })
 
-function comp:init(rate)
+function comp:init()
     self.goal = Vector()
     self.tween = false
-    self.rate = rate or 0.1
+    self.dir = Vector()
 end
 
 function comp:onadd()
 end
 
 -- sets position of entity
-function comp:tweenTo(x, y)
+function comp:tweenTo(x, y, dir)
+    local body = self.parent.Body
+
+    if not dir then body:setPosition(x, y); return end
 
     self.goal.x, self.goal.y = x, y
+    self.dir.x, self.dir.y = dir.x, dir.y
     self.tween = true
 
+    body.collideStatic = false
+    body:setPosition(x - 2 * (body.w * dir.x), y - 2 * (body.h * dir.y))
 end
 
 
 -- update body
 function comp:update(dt)
+
+    local body = self.parent.Body
+
+    body.collideStatic = not self.tween
+
+    if self.parent.controller then self.parent.controller.wait = self.tween end
+
     if not self.tween then return end
 
-    -- enter tweening
-    local body = self.parent.Body
-    local pos = body.position
+    local dx, dy = self.goal.x - body.position.x, self.goal.y - body.position.y
 
-    body.lock = true
-    body.clip = false
-
-    local dx, dy = self.goal.x - (pos.x), self.goal.y - (pos.y)
-
-    -- exit tweening
-    if math.abs(self.goal.x - pos.x) < 1 and math.abs(self.goal.y - pos.y) < 1 then
+    if math.abs(dx) > 1 then
+        body:impulse(100, self.dir.x, "x")
+    elseif math.abs(dy) > 1 then
+        body:impulse(100, self.dir.y, "y")
+    else
         self.tween = false
-        body.lock = false
-        body.clip = true
     end
-
-    body:setPosition(pos.x + dx * self.rate, pos.y + dy * self.rate)
 
 end
 

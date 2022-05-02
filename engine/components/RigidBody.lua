@@ -16,9 +16,6 @@ function comp:init()
 end
 
 function comp:onadd()
-    local world = self.parent.world
-    local grid = world.physicsGrid
-
     -- redfine the onmove function
     function self.parent.Body.getNextPosition(body, offset)
         if body.properties.static or not body.clip then return body.position + offset end
@@ -42,6 +39,7 @@ function comp:moveAndSlide(body, realOffset)
         local obj = world:getEntity(id)
         
         if not obj or not obj.components.rigidBody then goto next end
+        if obj.Body.properties.static and not body.collideStatic then goto next end
 
         -- get clipping distance
         local collision, dir = self:resolveCollision(pos.x + realOffset.x, pos.y + realOffset.y, obj.components.rigidBody)

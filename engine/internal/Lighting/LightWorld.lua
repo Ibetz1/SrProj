@@ -14,6 +14,7 @@ function world:init(ambience, d, settings)
 
     self.scale = Vector(1, 1)
     self.translation = Vector()
+    self.offset = Vector()
 
     self.glowTick = 0
     self.glowDir = 1
@@ -270,6 +271,7 @@ function world:draw()
     love.graphics.origin()
 
     -- scale
+    love.graphics.translate(self.offset.x, self.offset.y)
     love.graphics.scale(_Screen.aspectRatio.x, _Screen.aspectRatio.y) 
 
     love.graphics.draw(self.drawBuffer)
@@ -287,7 +289,6 @@ end
 function world:getScale() return self.scale end
 
 -- world translation
-
 function world:setTranslation(x, y)
     self.translation.x = x or self.translation.x
     self.translation.y = y or self.translation.y
@@ -295,6 +296,22 @@ end
 
 function world:getTranslation()
     return self.translation
+end
+
+function world:center()
+    local ox = (love.graphics.getWidth() - (self.drawBuffer:getWidth() * _Screen.aspectRatio.x)) / 2
+    local oy = (love.graphics.getHeight() - (self.drawBuffer:getHeight() * _Screen.aspectRatio.y)) / 2
+
+    self.offset.x, self.offset.y = ox, oy
+end
+
+function world:setOffset(x, y)
+    self.offset.x = x or self.offset.x * self.scale.x
+    self.offset.y = y or self.offset.y * self.scale.y
+end
+
+function world:getOffset()
+    return self.offset
 end
 
 -- world lights
@@ -343,8 +360,8 @@ end
 
 -- translates screen coord to scaled coord
 function world:translateScreenCoord(x, y)
-    local x = (x / self.scale.x / _Screen.aspectRatio.x) - self.translation.x
-    local y = (y / self.scale.y / _Screen.aspectRatio.y) - self.translation.y
+    local x = ((x - self.offset.x) / self.scale.x / _Screen.aspectRatio.x)
+    local y = ((y - self.offset.y) / self.scale.y / _Screen.aspectRatio.y)
 
     return x , y
 end

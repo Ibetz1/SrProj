@@ -13,6 +13,7 @@ function comp:init(x, y, w, h, properties)
     self.remove = false
 
     self.clip = true
+    self.collideStatic = true
     self.lock = false
 
     self.initialPosition = Vector(x, y)

@@ -192,6 +192,8 @@ end
 function vec2:clamp(min, max)
     self.x = math.min(math.max(self.x, min), max)
     self.y = math.min(math.max(self.x, min), max)
+
+    return self
 end
 
 -- rotate vector (clockwise)

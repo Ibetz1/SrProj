@@ -10,7 +10,7 @@ _LIGHTINGPATH       = _LIGHTINGPATH or _PACKAGE .. "lighting"
 
 
 _Constants = {
-    Friction = 0.8,
+    Friction = 0.5,
     Gravity = 100,
     Tilesize = 16
 }
