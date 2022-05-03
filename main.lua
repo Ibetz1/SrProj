@@ -26,8 +26,8 @@ end
 function love.keypressed(key)
     if key == "f11" then
         _Screen:fullscreen()
-        world:adjustScreenSize()
-        world.lightWorld:center()
+        _World:adjustScreenSize()
+        _World.lightWorld:center()
     end
 
     if key == "r" then
