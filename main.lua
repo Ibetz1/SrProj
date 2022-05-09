@@ -2,8 +2,8 @@ love.graphics.setDefaultFilter("nearest", "nearest")
 require("engine")
 local game = require("game")
 
-local _Stack, _World, _Index = game(16, 16, 2, {0.2, 0.2, 0.2})
-game.constructors:gameWorld1(_World, 11, 11)
+local _Stack, _World, _Index = game(16, 16, 2, {0.3, 0.0, 0.3})
+game.constructors:gameWorld1(_World, 13, 13)
 
 love.window.setVSync(0)
 
@@ -12,8 +12,6 @@ end
 
 function love.update(dt)
     _Stack:update(dt)
-
-    print(_Game.remainingRotations)
 end
 
 function love.draw()
@@ -31,8 +29,8 @@ function love.keypressed(key)
     end
 
     if key == "r" then
-        _Stack, _World, _Index = game(16, 16, 2, {0.2, 0.2, 0.2})
-        game.constructors:gameWorld1(_World, 11, 11)
+        _Stack, _World, _Index = game(16, 16, 2, {0.3, 0.0, 0.3})
+        game.constructors:gameWorld1(_World, 13, 13)
     end
 
     if key == "left" then

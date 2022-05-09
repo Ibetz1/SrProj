@@ -173,18 +173,19 @@ function world:renderNormals()
     love.graphics.origin()
     love.graphics.translate(self.translation.x, self.translation.y)
 
-        love.graphics.setBlendMode("replace")
+        love.graphics.setBlendMode("add")
 
         love.graphics.setShader(_Shaders.normal)
 
-        -- iterate lights
-        for j = 1, #self.lights do
-            local light = self.lights[j]
-            local px, py = light.position:unpack()
+        for l = 1, self.d do
 
-            _Shaders.normal:send("LightPos", {px, py, light.position.z})
+            -- iterate lights
+            for j = 1, #self.lights do
+                local light = self.lights[j]
+                local px, py = light.position:unpack()
 
-            for l = 1, self.d do
+                _Shaders.normal:send("LightPos", {px, py, light.position.z})
+
                 -- render normals
                 for i = 1, #self.bodies[l] do
                     local body = self.bodies[l][i]
@@ -192,7 +193,7 @@ function world:renderNormals()
                     if not body then goto next end
 
                     if (body:inRange(px, py, light.range)) or self.checkRange == false  then
-                        
+
                         body:renderNormal(px, py, 1, 0, 0)
 
                     end
@@ -203,6 +204,8 @@ function world:renderNormals()
         end
 
         love.graphics.setShader()
+
+        love.graphics.setBlendMode("alpha")
 
     love.graphics.setCanvas()
 end

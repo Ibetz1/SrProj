@@ -212,7 +212,7 @@ game.constructors = {
         globalEventHandler:newEvent("rotate", function(dir) return dir end)
         
         -- blocks
-        local block1 = game.entities:block(32, 48, 16, 13,                                   
+        local block1 = game.entities:block(32, 32, 16, 13,                                   
                                     _Textures.player[1].Tex,
                                     _Textures.player[1].Norm,
                                     _Textures.player[1].GlowHover, 
@@ -221,7 +221,7 @@ game.constructors = {
                                         selectedGlow = _Textures.player[1].GlowSelect, direction = {1, 0}, imageIndex = 1
                                     })
 
-        local block2 = game.entities:block((tw - 3) * 16, 48, 16, 13,                                   
+        local block2 = game.entities:block((tw - 3) * 16, 32, 16, 13,                                   
                                     _Textures.player[2].Tex,
                                     _Textures.player[2].Norm,
                                     _Textures.player[2].GlowHover, 
@@ -254,7 +254,7 @@ game.constructors = {
                                     })
         
         -- walls
-        local topWall = game.entities:wall(0, 0, 
+        local outterTopWall = game.entities:wall(0, -16, 
                                     _Textures.sideWallTex, 
                                     _Textures.sideWallNorm, 
                                     nil, tw, 1,
@@ -262,7 +262,7 @@ game.constructors = {
                                         ox = 0, oy = 16, oh = 16, ch = 29
                                     })
 
-        local bottomWall = game.entities:wall(0, (th - 1) * _Constants.Tilesize, 
+        local outterBottomWall = game.entities:wall(0, (th - 1) * _Constants.Tilesize, 
                                     _Textures.frontWallTex,  
                                     _Textures.frontWallNorm, 
                                     nil, tw, 1,
@@ -270,15 +270,16 @@ game.constructors = {
                                         ox = 0, oy = 16, oh = 16
                                     })
 
-        local leftWall = game.entities:wall(0, 0, 
+        local outterLeftWall = game.entities:wall(0, 0, 
                                     _Textures.frontWallTex, 
                                     _Textures.frontWallNorm, 
                                     nil, 1, th,
                                     {
                                         ox = 0, oy = 0
                                     })
+            
 
-        local rightWall = game.entities:wall(_Constants.Tilesize * (tw - 1), 0, 
+        local outterRightWall = game.entities:wall(_Constants.Tilesize * (tw - 1), 0, 
                                     _Textures.frontWallTex,  
                                     _Textures.frontWallNorm, 
                                     nil, 1, th,
@@ -304,10 +305,10 @@ game.constructors = {
         world:addEntity(block4, 2)
 
         -- walls
-        world:addEntity(topWall, 2)
-        world:addEntity(bottomWall, 2)
-        world:addEntity(leftWall, 2)
-        world:addEntity(rightWall, 2)
+        world:addEntity(outterTopWall, 2)
+        world:addEntity(outterBottomWall, 2)
+        world:addEntity(outterLeftWall, 2)
+        world:addEntity(outterRightWall, 2)
 
         world:setScale(
             _Screen.smallScreenSize.y / (th * _Constants.Tilesize),
@@ -319,11 +320,11 @@ game.constructors = {
 
 
         -- lighting
-        world.lightWorld:addLight(_Lighting.Light(16, 32, 100, {0.5, 0.2, 1}))
-        world.lightWorld:addLight(_Lighting.Light((tw - 1) * 16, 32, 100, {0.5, 0.2, 1}))
-        world.lightWorld:addLight(_Lighting.Light(16, (th - 1) * 16, 100, {0.5, 0.2, 1}))
-        world.lightWorld:addLight(_Lighting.Light((tw - 1) * 16, (th - 1) * 16, 100, {0.5, 0, 1}))
-        world.lightWorld:addLight(_Lighting.Light((tw * 16) / 2, (th * 16) / 2, 100, {0.2, 0.2, 1}))
+        world.lightWorld:addLight(_Lighting.Light(16, 32, 100, {0.9, 0.2, 1}))
+        world.lightWorld:addLight(_Lighting.Light((tw - 1) * 16, 32, 100, {0.9, 0.2, 0}))
+        world.lightWorld:addLight(_Lighting.Light(16, (th - 1) * 16, 100, {0.9, 0.2, 1}))
+        world.lightWorld:addLight(_Lighting.Light((tw - 1) * 16, (th - 1) * 16, 100, {0.9, 0, 1}))
+        world.lightWorld:addLight(_Lighting.Light((tw * 16) / 2, (th * 16) / 2, 200, {0.0, 0.5, 1}))
                                 
         -- translation
         world.lightWorld:center()
