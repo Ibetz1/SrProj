@@ -15,28 +15,12 @@ end
 function light:sizeBuffer()
     local w, h = self.range * 2, self.range * 2
 
-    self.lightBuffer = love.graphics.newCanvas(w, h)
     self.shadowBuffer = love.graphics.newCanvas(w, h)
-
-    -- self.buffer:setFilter("nearest", "nearest")
-
-    -- render light
-    love.graphics.setCanvas(self.lightBuffer)
-
-        _Shaders.light:send("Radius", self.range)
-        _Shaders.light:send("Position", {(w / 2), (h / 2), self.position.z})
-
-        love.graphics.setShader(_Shaders.light)
-
-        love.graphics.circle("fill", w / 2, h / 2, self.range)
-
-        love.graphics.setShader()
-
-    love.graphics.setCanvas()
+    self.normalBuffer = love.graphics.newCanvas(w, h)
 end
 
 -- updates shadow buffer
-function light:updateShadowBuffer(f, tx, ty, ...)
+function light:updateShadowBuffer(f, ...)
     local canvas = love.graphics.getCanvas()
     local blendMode = love.graphics.getBlendMode()
 
@@ -49,18 +33,42 @@ function light:updateShadowBuffer(f, tx, ty, ...)
 
         f(...)
 
+        love.graphics.setBlendMode(blendMode)
+    love.graphics.setCanvas(canvas)
+end
+
+-- updates normal buffer
+function light:updateNormalBuffer(f, ...)
+    local canvas = love.graphics.getCanvas()
+    local blend  = love.graphics.getBlendMode()
+
+    love.graphics.setCanvas(self.normalBuffer)
+        love.graphics.origin()
+        love.graphics.setBlendMode("alpha")
+        love.graphics.clear()
+
+        _Shaders.lightNormal:send("Radius", self.range)
+        _Shaders.lightNormal:send("Position", {(self.range), (self.range), self.position.z})
+        love.graphics.setShader(_Shaders.lightNormal)
+
+        f(...)
+
+        love.graphics.setShader()
+
         love.graphics.setBlendMode("multiply", "premultiplied")
 
-        love.graphics.draw(self.lightBuffer)
+        love.graphics.draw(self.shadowBuffer)
 
+        love.graphics.setBlendMode(blend)
     love.graphics.setCanvas(canvas)
-    love.graphics.setBlendMode(blendMode)
 end
 
 function light:draw()
     love.graphics.setColor(unpack(self.color))
 
-    love.graphics.draw(self.shadowBuffer, (self.position.x - self.range), (self.position.y - self.range))
+    love.graphics.draw(self.normalBuffer, math.floor(self.position.x - self.range), math.floor(self.position.y - self.range))
+
+    love.graphics.setColor(1, 1, 1)
 end
 
 -- sets light positon

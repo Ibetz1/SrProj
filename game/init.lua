@@ -155,7 +155,7 @@ local game = {
 game.constructors = {
     gameWorld1 = function(_, world, tw, th)
         _Game.selected = nil
-        _Game.remainingRotations = 1
+        _Game.remainingRotations = 2
         _Game.remainingBlocks = 4
 
         _Textures = {
@@ -318,13 +318,12 @@ game.constructors = {
         world.lightWorld:setBufferWindow(tw * _Constants.Tilesize * world.lightWorld.scale.x, 
                                         ((th) * _Constants.Tilesize * world.lightWorld.scale.y))
 
-
         -- lighting
-        world.lightWorld:addLight(_Lighting.Light(16, 32, 100, {0.9, 0.2, 1}))
-        world.lightWorld:addLight(_Lighting.Light((tw - 1) * 16, 32, 100, {0.9, 0.2, 0}))
-        world.lightWorld:addLight(_Lighting.Light(16, (th - 1) * 16, 100, {0.9, 0.2, 1}))
-        world.lightWorld:addLight(_Lighting.Light((tw - 1) * 16, (th - 1) * 16, 100, {0.9, 0, 1}))
-        world.lightWorld:addLight(_Lighting.Light((tw * 16) / 2, (th * 16) / 2, 200, {0.0, 0.5, 1}))
+        -- world.lightWorld:addLight(_Lighting.Light(16, 16, 100, {0.9, 0.2, 0}))
+        -- world.lightWorld:addLight(_Lighting.Light((tw - 1) * 16, 16, 100, {0.9, 0.2, 0}))
+        -- world.lightWorld:addLight(_Lighting.Light(16, (th - 1) * 16, 100, {0.9, 0.2, 0}))
+        -- world.lightWorld:addLight(_Lighting.Light((tw - 1) * 16, (th - 1) * 16, 100, {0.9, 0.2, 0}))
+        world.lightWorld:addLight(_Lighting.Light((tw * 16) / 2, (th * 16) / 2, 150, {0.8, 0.3, 0}))
                                 
         -- translation
         world.lightWorld:center()

@@ -12,15 +12,27 @@ extern Image NormalMap;
 vec4 effect(vec4 pixel, Image Texture, vec2 tc, vec2 pc) {
     
     // Distance between the screen pixel and the center of the light
-    vec3 Delta = vec3(pc, 0.0) - Position;
+    vec3 Delta = vec3(pc.xy - Position.xy, 0.0);
     float Distance = length( Delta );
-
 
     // If the distance is lower than the radius
     if (Distance <= Radius) {
+	    vec4 NormalMap = Texel(Texture, tc);
+        vec3 Direction = vec3(-Delta.xy, Position.z);
+
+        // Normalize the normal map
+        vec3 N = normalize(NormalMap.rgb * 2.0 - 1.0);
+
+        // Normalize the light direction
+        vec3 L = normalize(Direction);
+
         float att = clamp((1.0 - Distance / Radius) / Smooth, 0.0, 1.0);
 
-        return vec4(clamp(pixel.rgb * pow(att, Smooth) + pow(smoothstep(Glow.x, 1.0, att), Smooth) * Glow.y, 0.0, 1.0), 1);
+        vec4 diffuse  = vec4(clamp(pixel.rgb * pow(att, Smooth) + pow(smoothstep(Glow.x, 1.0, att), Smooth) * Glow.y, 0.0, 1.0), 1);
+
+        // return diffuse;
+
+        return ((dot(N, L)) * diffuse) + diffuse;
     }
     
     discard;

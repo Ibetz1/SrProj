@@ -75,7 +75,7 @@ function world:renderLights(dt)
                         if not body:inRange(px, py, light.range) and self.checkRange then goto next end
 
                         body:renderShadow(px, py, light.range, ox, oy, -self.translation.x, -self.translation.y)
-                        
+
                         ::next::
                     end
 
@@ -99,12 +99,16 @@ function world:renderLights(dt)
                         ::next::
                     end
                 end
+            end, ox, oy)
 
-            end, tx, ty, ox, oy)
+            light:updateNormalBuffer(function(ox, oy)
+                love.graphics.setColor(1, 1, 1)
+                love.graphics.draw(self.normalMap, ox, oy)
+            end, ox, oy)
 
             light:update(dt, tx, ty)
 
-            love.graphics.setBlendMode("screen", "premultiplied")
+            love.graphics.setBlendMode("add", "premultiplied")
 
             love.graphics.translate(tx, ty)
 
@@ -118,19 +122,10 @@ function world:renderLights(dt)
     love.graphics.setCanvas()
 end
 
--- normalizes lighrs
+-- normalizes lights
 function world:normalizeLights()
     love.graphics.setCanvas(self.normalBuffer)
         love.graphics.clear(0, 0, 0)
-
-
-        love.graphics.setBlendMode("add", "premultiplied")
-
-        love.graphics.draw(self.normalMap)
-
-        love.graphics.setBlendMode("multiply", "premultiplied")
- 
-        love.graphics.draw(self.lightingBuffer)
 
         love.graphics.setBlendMode("add", "premultiplied")
 
@@ -144,24 +139,23 @@ end
 -- renders textures
 function world:renderTextures()
     love.graphics.setCanvas(self.texBuffer)
-    love.graphics.clear(1, 1, 1)
-    love.graphics.origin()
-    love.graphics.translate(self.translation.x, self.translation.y)
+        love.graphics.clear(1, 1, 1)
+        love.graphics.origin()
+        love.graphics.translate(self.translation.x, self.translation.y)
 
-    love.graphics.setBlendMode("alpha")
+        love.graphics.setBlendMode("alpha")
 
-    for l = 1, self.d do
-        for i = 1, #self.bodies[l] do
-            local body = self.bodies[l][i]
+        for l = 1, self.d do
+            for i = 1, #self.bodies[l] do
+                local body = self.bodies[l][i]
 
-            if not body then goto next end
-    
-            body:renderTexture(self)
+                if not body then goto next end
+        
+                body:renderTexture(self)
 
-            ::next::
+                ::next::
+            end
         end
-    end
-
 
     love.graphics.setCanvas()
 end
@@ -173,37 +167,23 @@ function world:renderNormals()
     love.graphics.origin()
     love.graphics.translate(self.translation.x, self.translation.y)
 
-        love.graphics.setBlendMode("add")
+        love.graphics.setBlendMode("alpha")
 
-        love.graphics.setShader(_Shaders.normal)
+        love.graphics.setShader()
 
         for l = 1, self.d do
 
-            -- iterate lights
-            for j = 1, #self.lights do
-                local light = self.lights[j]
-                local px, py = light.position:unpack()
+            -- render normals
+            for i = 1, #self.bodies[l] do
+                local body = self.bodies[l][i]
+    
+                if not body then goto next end
 
-                _Shaders.normal:send("LightPos", {px, py, light.position.z})
+                    body:renderNormal()
 
-                -- render normals
-                for i = 1, #self.bodies[l] do
-                    local body = self.bodies[l][i]
-        
-                    if not body then goto next end
-
-                    if (body:inRange(px, py, light.range)) or self.checkRange == false  then
-
-                        body:renderNormal(px, py, 1, 0, 0)
-
-                    end
-
-                    ::next::
-                end    
+                ::next::    
             end
         end
-
-        love.graphics.setShader()
 
         love.graphics.setBlendMode("alpha")
 
@@ -246,7 +226,6 @@ function world:update(dt)
     self:renderGlow(dt)
     self:normalizeLights()
 
-
     love.graphics.push()
 
     love.graphics.setCanvas(self.drawBuffer)
@@ -256,15 +235,16 @@ function world:update(dt)
         love.graphics.scale(self.scale.x, self.scale.y)
 
         -- render lighting buffer
-        love.graphics.setBlendMode("add")
+        love.graphics.setBlendMode("add", "premultiplied")
         
-            love.graphics.draw(self.normalBuffer)
+            love.graphics.draw(self.lightingBuffer)
         
-        -- render normals and textures
+        -- render textures
         love.graphics.setBlendMode("multiply", "premultiplied")
 
             love.graphics.draw(self.texBuffer)
-            
+        
+        -- add post processing
         love.graphics.setBlendMode("add")
 
             love.graphics.draw(self.glowBuffer)

@@ -64,10 +64,10 @@ function body:renderShadow(lx, ly, length, ox, oy)
 end
 
 -- renders normal
-function body:renderNormal()
+function body:renderNormal(ox, oy)
     if not self.normal or self.fadeout then return false end
 
-    love.graphics.draw(self.normal, self.position.x, self.position.y)
+    love.graphics.draw(self.normal, self.position.x + (ox or 0), self.position.y + (oy or 0))
 end
 
 -- renders glow
@@ -158,7 +158,6 @@ end
 
 -- sets position
 function body:setPosition(x, y)
-
     self.position.x, self.position.y = x, y
 
     self.position:floor()
