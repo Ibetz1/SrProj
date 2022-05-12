@@ -260,16 +260,28 @@ end
 
 -- draws world
 function world:draw()
-    love.graphics.push()
-    love.graphics.origin()
 
-    -- scale
-    love.graphics.translate(self.offset.x, self.offset.y)
-    love.graphics.scale(_Screen.aspectRatio.x, _Screen.aspectRatio.y) 
+    love.graphics.setBackgroundColor(unpack(self.backGroundColor or self.ambience))
+
+    -- draw background
+    if self.backGroundTexture then 
+        love.graphics.setColor(unpack(self.backGroundColor or self.ambience))
+        
+        love.graphics.push()
+
+        love.graphics.scale(self.scale.x, self.scale.y)
+
+        love.graphics.draw(self.backGroundTexture)
+
+        love.graphics.pop()
+
+        love.graphics.setColor(1, 1, 1, 1)
+    end
+
+    love.graphics.translate(self.offset.x / _Screen.aspectRatio.x, 
+                            self.offset.y / _Screen.aspectRatio.y)
 
     love.graphics.draw(self.drawBuffer)
-
-    love.graphics.pop()
 end
 
 
@@ -374,6 +386,16 @@ function world:setBufferWindow(w, h)
     }
 
     self:setBuffers()
+end
+
+-- sets background color
+function world:setBackgroundColor(r, g, b)
+    self.backGroundColor = {r, g, b}
+end
+
+-- set background textire
+function world:setBackgroundTexture(tex)
+    self.backGroundTexture = tex
 end
 
 return world

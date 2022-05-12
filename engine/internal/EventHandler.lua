@@ -15,8 +15,8 @@ function eventHandler:newEvent(name, f)
     self.activeEvents[name] = {}
 end
 
--- toggles event with params
-function eventHandler:toggle(name, ...)
+-- pushs event with params
+function eventHandler:push(name, ...)
     local event = self.events[name]
 
     table.insert(self.activeEvents[name], event.f(...))
@@ -41,7 +41,7 @@ function eventHandler:read(name, index)
     return
 end
 
--- checks for event toggles
+-- checks for event pushs
 function eventHandler:update(dt)
     for _, event in pairs(self.activeEvents) do
         for i = 1, #event do

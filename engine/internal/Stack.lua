@@ -19,29 +19,32 @@ end
 -- adds a pre-existing scene
 function stack:addScene(scene)
     table.insert(self.scenes, scene)
-    return #self.scenes
-end
 
--- sets current scene
-function stack:setScene(index)
-    self.scene = index
-
-    self.scenes[index]:onadd()
+    scene:onadd()
 end
 
 -- updates current scene
 function stack:update(dt)
-    if not self.scene then return end
-
-    self.scenes[self.scene]:update(dt)
+    for _, scene in pairs(self.scenes) do
+        if scene.update then scene:update(dt) end
+    end
 
     self.eventHandler:update()
 end
 
 -- draws current scene
 function stack:draw()
-    if not self.scene then return end
-    self.scenes[self.scene]:draw()
+    for _, scene in pairs(self.scenes) do
+        love.graphics.push()
+
+            love.graphics.origin()
+
+            love.graphics.scale(_Screen.aspectRatio.x, _Screen.aspectRatio.y) 
+
+            if scene.draw then scene:draw() end
+
+        love.graphics.pop()
+    end
 end
 
 return stack

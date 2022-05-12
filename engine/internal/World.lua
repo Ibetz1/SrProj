@@ -94,16 +94,6 @@ end
 -- draws world
 function world:draw()
     self.lightWorld:draw()
-
-    for l = 1, self.d do
-        for id, ent in pairs(self.entities[l]) do
-
-            if ent.draw then ent:draw(dt) end
-    
-            ::next::
-        end
-    end
-
 end
 
 -- shortcuts

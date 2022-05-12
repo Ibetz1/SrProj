@@ -145,10 +145,12 @@ local game = {
     __call = function(self, worldW, worldH, worldD, worldAmbience)
         self.stack =_Internal.Stack()
         self.world = _Internal.World(worldW, worldH, worldD, worldAmbience)
-        self.worldIndex = self.stack:addScene(self.world)
+        self.interface = _Interface.Handler()
 
-        self.stack:setScene(self.worldIndex)
-        return self.stack, self.world, self.worldIndex
+        self.stack:addScene(self.world)
+        self.stack:addScene(self.interface)
+
+        return self.stack, self.world, self.interface
     end
 }
 
