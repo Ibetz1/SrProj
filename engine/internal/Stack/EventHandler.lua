@@ -28,25 +28,25 @@ function eventHandler:listen(name)
 end
 
 -- reads event for value
-function eventHandler:read(name, index)
-    local event = self:listen(name)
-
-    if #event == 0 then return end
-
-    for i = 1, #event do
-        return event[index]
-    end
-
-
-    return
+function eventHandler:poll(name, index)
+    return self:listen(name)[index]
 end
 
--- checks for event pushs
+-- clears specified event
+function eventHandler:clearEvent(name)
+    local event = self.activeEvents[name]
+
+    if not event then return end
+
+    while #event > 0 do
+        table.remove(event, 1)
+    end
+end
+
+-- clears all events
 function eventHandler:update(dt)
-    for _, event in pairs(self.activeEvents) do
-        for i = 1, #event do
-            table.remove(event, i)
-        end
+    for name, _ in pairs(self.activeEvents) do
+        self:clearEvent(name)
     end
 end
 

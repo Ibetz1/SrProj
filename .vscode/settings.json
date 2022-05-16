@@ -18,5 +18,6 @@
         "_COMPONENTPATH",
         "_IMAGEPATH",
         "Vector"
-    ]
+    ],
+    "Lua.completion.autoRequire": false
 }

@@ -34,6 +34,7 @@ end
 
 -- draws current scene
 function stack:draw()
+
     for _, scene in pairs(self.scenes) do
         love.graphics.push()
 

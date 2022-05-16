@@ -143,12 +143,12 @@ local game = {
     },
 
     __call = function(self, worldW, worldH, worldD, worldAmbience)
-        self.stack =_Internal.Stack()
+        self.stack = _Internal.Stack()
         self.world = _Internal.World(worldW, worldH, worldD, worldAmbience)
         self.interface = _Interface.Handler()
 
-        self.stack:addScene(self.world)
         self.stack:addScene(self.interface)
+        self.stack:addScene(self.world)
 
         return self.stack, self.world, self.interface
     end
@@ -325,7 +325,7 @@ game.constructors = {
         -- world.lightWorld:addLight(_Lighting.Light((tw - 1) * 16, 16, 100, {0.9, 0.2, 0}))
         -- world.lightWorld:addLight(_Lighting.Light(16, (th - 1) * 16, 100, {0.9, 0.2, 0}))
         -- world.lightWorld:addLight(_Lighting.Light((tw - 1) * 16, (th - 1) * 16, 100, {0.9, 0.2, 0}))
-        world.lightWorld:addLight(_Lighting.Light((tw * 16) / 2, (th * 16) / 2, 150, {0.8, 0.3, 0}))
+        world.lightWorld:addLight(_Lighting.Light((tw * 16) / 2, (th * 16) / 2, 150, {1.0, 0.5, 0.3}))
                                 
         -- translation
         world.lightWorld:center()
