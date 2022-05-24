@@ -99,6 +99,10 @@ function comp:update(dt)
 end
 
 function comp:draw()
+    local lw = _World.lightWorld
+    local sx, sy = lw.scale.x, lw.scale.y
+
+    love.graphics.rectangle("line", self.position.x * sx, self.position.y * sy, self.w * sx, self.h * sy)
 end
 
 return comp

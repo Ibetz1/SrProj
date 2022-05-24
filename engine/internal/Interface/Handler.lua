@@ -48,14 +48,14 @@ function interface:mouseBound(x, y, w, h)
 end 
 
 function interface:update(dt)
-    for name, executions in pairs(self.eventExecutions) do
+    for name, execution in pairs(self.eventExecutions) do
 
         -- poll event and check executions
         for _, event in pairs(globalEventHandler:listen(name)) do
 
             -- call execution on event
-            for val, exec in pairs(executions) do
-                if event[exec[2]] == val then
+            for val, exec in pairs(execution) do
+                if tostring(event[exec[2]]) == val then
                     exec[1]()
                 end
             end

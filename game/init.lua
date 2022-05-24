@@ -2,6 +2,57 @@ local BodyController = require("game.components.BodyController")
 local BodyDetector = require("game.components.BodyDetector")
 local BodySelector = require("game.components.BodySelector")
 
+_Textures = {
+
+    sideWallTex = imageQuad(_Assets.tileset, 0, 0, 16, 32),
+    sideWallNorm = imageQuad(_Assets.tileset, 32, 0, 16, 32),
+    frontWallTex = imageQuad(_Assets.tileset, 0, 0, 16, 16),
+    frontWallNorm = imageQuad(_Assets.tileset, 32, 0, 16, 16),
+    
+    player = {
+        -- right
+        {
+            Tex = batchedImage(imageQuad(_Assets.tileset, 16, 32, 16, 16), 1, 1),
+            Norm = batchedImage(imageQuad(_Assets.tileset, 48, 32, 16, 16), 1, 1),
+            GlowHover = batchedImage(imageQuad(_Assets.tileset, 80, 32, 16, 16), 1, 1),
+            GlowSelect = batchedImage(imageQuad(_Assets.tileset, 96, 32, 16, 16), 1, 1),
+        },
+
+        -- down
+        {
+            Tex = batchedImage(imageQuad(_Assets.tileset, 16, 16, 16, 16), 1, 1),
+            Norm = batchedImage(imageQuad(_Assets.tileset, 48, 16, 16, 16), 1, 1),
+            GlowHover = batchedImage(imageQuad(_Assets.tileset, 80, 16, 16, 16), 1, 1),
+            GlowSelect = batchedImage(imageQuad(_Assets.tileset, 96, 16, 16, 16), 1, 1),
+        },
+
+        -- left
+        {
+            Tex = batchedImage(imageQuad(_Assets.tileset, 16, 0, 16, 16), 1, 1),
+            Norm = batchedImage(imageQuad(_Assets.tileset, 48, 0, 16, 16), 1, 1),
+            GlowHover = batchedImage(imageQuad(_Assets.tileset, 80, 0, 16, 16), 1, 1),
+            GlowSelect = batchedImage(imageQuad(_Assets.tileset, 96, 0, 16, 16), 1, 1),
+        },
+
+        -- up
+        {
+            Tex = batchedImage(imageQuad(_Assets.tileset, 16, 48, 16, 16), 1, 1),
+            Norm = batchedImage(imageQuad(_Assets.tileset, 48, 48, 16, 16), 1, 1),
+            GlowHover = batchedImage(imageQuad(_Assets.tileset, 80, 48, 16, 16), 1, 1),
+            GlowSelect = batchedImage(imageQuad(_Assets.tileset, 96, 48, 16, 16), 1, 1),
+        },
+    },
+
+
+    floorTile = imageQuad(_Assets.tileset, 0, 32, 16, 16),
+    floorNormal = imageQuad(_Assets.tileset, 32, 32, 16, 16),
+    
+    goalTex = imageQuad(_Assets.tileset, 0, 48, 16, 16),
+    goalNorm = imageQuad(_Assets.tileset, 32, 48, 16, 16),
+    goalGlow = imageQuad(_Assets.tileset, 64, 48, 16, 16)
+
+    }
+
 local game = {
     entities = {
         block = function(_, x, y, w, h, texture, normal, glow, options)
@@ -145,7 +196,7 @@ local game = {
     __call = function(self, worldW, worldH, worldD, worldAmbience)
         self.stack = _Internal.Stack()
         self.world = _Internal.World(worldW, worldH, worldD, worldAmbience)
-        self.interface = _Interface.Handler()
+        self.interface = _UserInterface.Handler()
 
         self.stack:addScene(self.interface)
         self.stack:addScene(self.world)
@@ -157,59 +208,8 @@ local game = {
 game.constructors = {
     gameWorld1 = function(_, world, tw, th)
         _Game.selected = nil
-        _Game.remainingRotations = 2
+        _Game.remainingRotations = 100
         _Game.remainingBlocks = 4
-
-        _Textures = {
-
-        sideWallTex = imageQuad(_Assets.tileset, 0, 0, 16, 32),
-        sideWallNorm = imageQuad(_Assets.tileset, 32, 0, 16, 32),
-        frontWallTex = imageQuad(_Assets.tileset, 0, 0, 16, 16),
-        frontWallNorm = imageQuad(_Assets.tileset, 32, 0, 16, 16),
-        
-        player = {
-            -- right
-            {
-                Tex = batchedImage(imageQuad(_Assets.tileset, 16, 32, 16, 16), 1, 1),
-                Norm = batchedImage(imageQuad(_Assets.tileset, 48, 32, 16, 16), 1, 1),
-                GlowHover = batchedImage(imageQuad(_Assets.tileset, 80, 32, 16, 16), 1, 1),
-                GlowSelect = batchedImage(imageQuad(_Assets.tileset, 96, 32, 16, 16), 1, 1),
-            },
-
-            -- down
-            {
-                Tex = batchedImage(imageQuad(_Assets.tileset, 16, 16, 16, 16), 1, 1),
-                Norm = batchedImage(imageQuad(_Assets.tileset, 48, 16, 16, 16), 1, 1),
-                GlowHover = batchedImage(imageQuad(_Assets.tileset, 80, 16, 16, 16), 1, 1),
-                GlowSelect = batchedImage(imageQuad(_Assets.tileset, 96, 16, 16, 16), 1, 1),
-            },
-
-            -- left
-            {
-                Tex = batchedImage(imageQuad(_Assets.tileset, 16, 0, 16, 16), 1, 1),
-                Norm = batchedImage(imageQuad(_Assets.tileset, 48, 0, 16, 16), 1, 1),
-                GlowHover = batchedImage(imageQuad(_Assets.tileset, 80, 0, 16, 16), 1, 1),
-                GlowSelect = batchedImage(imageQuad(_Assets.tileset, 96, 0, 16, 16), 1, 1),
-            },
-
-            -- up
-            {
-                Tex = batchedImage(imageQuad(_Assets.tileset, 16, 48, 16, 16), 1, 1),
-                Norm = batchedImage(imageQuad(_Assets.tileset, 48, 48, 16, 16), 1, 1),
-                GlowHover = batchedImage(imageQuad(_Assets.tileset, 80, 48, 16, 16), 1, 1),
-                GlowSelect = batchedImage(imageQuad(_Assets.tileset, 96, 48, 16, 16), 1, 1),
-            },
-        },
-
-
-        floorTile = imageQuad(_Assets.tileset, 0, 32, 16, 16),
-        floorNormal = imageQuad(_Assets.tileset, 32, 32, 16, 16),
-        
-        goalTex = imageQuad(_Assets.tileset, 0, 48, 16, 16),
-        goalNorm = imageQuad(_Assets.tileset, 32, 48, 16, 16),
-        goalGlow = imageQuad(_Assets.tileset, 64, 48, 16, 16)
-
-        }
 
         globalEventHandler:newEvent("rotate", function(dir) return dir end)
         
@@ -329,6 +329,69 @@ game.constructors = {
                                 
         -- translation
         world.lightWorld:center()
+
+        return function()
+            
+        end
+    end,
+
+    lightDemo = function(_, world, tw, th)
+        _Game.selected = nil
+        _Game.remainingRotations = 100
+        _Game.remainingBlocks = 4
+
+        globalEventHandler:newEvent("rotate", function(dir) return dir end)
+
+
+        local floor = game.entities:tiledImage(0, 0, _Textures.floorTile, _Textures.floorNormal, nil, tw, th)
+        local block1 = game.entities:block(32, 32, 16, 13,                                   
+                                    _Textures.player[1].Tex,
+                                    _Textures.player[1].Norm,
+                                    _Textures.player[1].GlowHover, 
+                                    {
+                                        ox = 0, oy = 3, ww = tw * _Constants.Tilesize, wh = th * _Constants.Tilesize, 
+                                        selectedGlow = _Textures.player[1].GlowSelect, direction = {1, 0}, imageIndex = 1
+                                    })
+
+        _Game.selected = block1.id
+
+        world:addEntity(floor, 1)
+        world:addEntity(block1, 2);
+
+        world:setScale(
+            _Screen.smallScreenSize.y / (th * _Constants.Tilesize),
+            _Screen.smallScreenSize.y / (th * _Constants.Tilesize)
+        )
+
+        local light = _Lighting.Light((tw * 16) / 2, (th * 16) / 2, 150, {1.0, 0.5, 0.3})
+
+        world.lightWorld:addLight(light)
+
+        local h = 0
+        local r, g, b = 0.9, 0.4, 0
+
+        world.lightWorld:setBufferWindow(tw * _Constants.Tilesize * world.lightWorld.scale.x, 
+                                        ((th) * _Constants.Tilesize * world.lightWorld.scale.y))
+
+        _Interface:newEventInterface("mousepressed", 3, 2, function() 
+            local px, py = world:convertScreenCoord(love.mouse.getPosition())
+            world.lightWorld:addLight(_Lighting.Light(px, py, 100, {r, g, b}))
+        end)
+
+        _World.lightWorld:center()
+
+        return function()
+            h = h + 0.5
+            if (h > 360) then
+                h = 0
+            end
+
+            r, g, b = HSV(h, 1, 1)
+
+            local px, py = love.mouse.getPosition()
+            light:setPosition(world:convertScreenCoord(px, py))
+            light:setColor(r, g, b)
+        end
     end
 }
 

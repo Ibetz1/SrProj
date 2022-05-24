@@ -22,7 +22,7 @@ function comp:onadd()
     local Tilesize = _Constants.Tilesize
 
     -- set positional data
-    self.w, self.h = ceil(body.w / Tilesize) + 1, ceil(body.h / Tilesize) + 2
+    self.w, self.h = ceil(body.w / Tilesize) + 1, ceil(body.h / Tilesize) + 1
 
     self:updateGrid(
         body.gridPosition.x, body.gridPosition.y,
@@ -81,6 +81,22 @@ function comp:update(dt)
 end
 
 function comp:draw()
+    local lw = _World.lightWorld
+    local sx, sy = lw.scale.x, lw.scale.y
+    local body = self.parent.Body
+
+    love.graphics.setColor(1, 0, 0, 1)
+
+    for x = 0, self.w - 1 do
+        for y = 0, self.h - 1 do
+            love.graphics.rectangle("line", (body.gridPosition.x + x) * sy * 16, (body.gridPosition.y + y) * sx * 16, 16 * sx, 16 * sy)
+        end
+    end
+
+    love.graphics.setColor(1, 1, 1, 1)
+
+
+
 end
 
 return comp
