@@ -19,8 +19,8 @@ function world:init(w, h, d, ambience)
 
 
     -- event handlers
-    globalEventHandler:newEvent("staticCollision", function(id1, id2, dir) return {id1, id2, dir} end)
-    globalEventHandler:newEvent("collision", function(id1, id2, dir) return {id1, id2, dir} end)
+    _EventManager:newEvent("staticCollision", function(id1, id2, dir) return {id1, id2, dir} end)
+    _EventManager:newEvent("collision", function(id1, id2, dir) return {id1, id2, dir} end)
 end
 
 function world:onadd()
@@ -94,15 +94,6 @@ end
 -- draws world
 function world:draw()
     self.lightWorld:draw()
-
-    -- for l = 1, self.d do
-
-    --     -- update entities
-    --     for id, ent in pairs(self.entities[l]) do
-
-    --         ent:draw()
-    --     end
-    -- end
 end
 
 -- shortcuts

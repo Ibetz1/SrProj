@@ -15,8 +15,8 @@ function interface:onadd()
     local function event(...) return {...} end
 
     for type, _ in pairs(self.eventExecutions) do
-        love[type] = function(...)  globalEventHandler:push(type, ...) end
-        globalEventHandler:newEvent(type, event)
+        love[type] = function(...)  _EventManager:push(type, ...) end
+        _EventManager:newEvent(type, event)
     end
 
     for _, obj in pairs(self.objects) do
@@ -51,7 +51,7 @@ function interface:update(dt)
     for name, execution in pairs(self.eventExecutions) do
 
         -- poll event and check executions
-        for _, event in pairs(globalEventHandler:listen(name)) do
+        for _, event in pairs(_EventManager:listen(name)) do
 
             -- call execution on event
             for val, exec in pairs(execution) do

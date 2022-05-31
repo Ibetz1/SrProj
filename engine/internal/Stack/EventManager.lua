@@ -6,6 +6,10 @@ function eventHandler:init()
     self.activeEvents = {}
 end
 
+function eventHandler:clear()
+    self.events = {}
+end
+
 -- creates an event
 function eventHandler:newEvent(name, f)
     self.events[name] = {

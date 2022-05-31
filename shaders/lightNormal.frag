@@ -33,7 +33,7 @@ vec4 effect(vec4 pixel, Image Texture, vec2 tc, vec2 pc) {
 
         float att = clamp((1.0 - Distance / Radius) / Smooth, 0.0, 1.0);
 
-        vec4 diffuse  = vec4(clamp(pixel.rgb * pow(att, Smooth) + pow(smoothstep(Glow.x, 1.0, att), Smooth) * Glow.y, 0.0, 1.0), 1);
+        vec4 diffuse = vec4(clamp(pixel.rgb * pow(att, Smooth) + pow(smoothstep(Glow.x, 1.0, att), Smooth) * Glow.y, 0.0, 1.0), 1);
 
         // return diffuse;
 

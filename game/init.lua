@@ -77,6 +77,7 @@ local game = {
             ent:addComponent(_Components.PhysicsGridUpdater())
 
             local selector = BodySelector(
+                
             -- on hover
             function()
                 if not glow then return end
@@ -194,14 +195,11 @@ local game = {
     },
 
     __call = function(self, worldW, worldH, worldD, worldAmbience)
-        self.stack = _Internal.Stack()
         self.world = _Internal.World(worldW, worldH, worldD, worldAmbience)
-        self.interface = _UserInterface.Handler()
 
-        self.stack:addScene(self.interface)
-        self.stack:addScene(self.world)
+        _Stack:addScene(self.world)
 
-        return self.stack, self.world, self.interface
+        return self.world
     end
 }
 
@@ -211,7 +209,7 @@ game.constructors = {
         _Game.remainingRotations = 100
         _Game.remainingBlocks = 4
 
-        globalEventHandler:newEvent("rotate", function(dir) return dir end)
+        _EventManager:newEvent("rotate", function(dir) return dir end)
         
         -- blocks
         local block1 = game.entities:block(32, 32, 16, 13,                                   
@@ -294,6 +292,7 @@ game.constructors = {
                                         batchedImage(_Textures.goalTex, 1, 1), 
                                         batchedImage(_Textures.goalNorm, 1, 1), 
                                         batchedImage(_Textures.goalGlow, 1, 1))
+                                        
         local goalDetector = game.entities:goal(math.floor(tw / 2) * _Constants.Tilesize, math.floor(th / 2) * _Constants.Tilesize, 16, 16)
         
         world:addEntity(floor, 1)
@@ -312,14 +311,6 @@ game.constructors = {
         world:addEntity(outterLeftWall, 2)
         world:addEntity(outterRightWall, 2)
 
-        world:setScale(
-            _Screen.smallScreenSize.y / (th * _Constants.Tilesize),
-            _Screen.smallScreenSize.y / (th * _Constants.Tilesize)
-        )
-
-        world.lightWorld:setBufferWindow(tw * _Constants.Tilesize * world.lightWorld.scale.x, 
-                                        ((th) * _Constants.Tilesize * world.lightWorld.scale.y))
-
         -- lighting
         -- world.lightWorld:addLight(_Lighting.Light(16, 16, 100, {0.9, 0.2, 0}))
         -- world.lightWorld:addLight(_Lighting.Light((tw - 1) * 16, 16, 100, {0.9, 0.2, 0}))
@@ -328,7 +319,15 @@ game.constructors = {
         world.lightWorld:addLight(_Lighting.Light((tw * 16) / 2, (th * 16) / 2, 150, {1.0, 0.5, 0.3}))
                                 
         -- translation
-        world.lightWorld:center()
+        world:setScale(
+            _Screen.smallScreenSize.y / (th * _Constants.Tilesize),
+            _Screen.smallScreenSize.y / (th * _Constants.Tilesize)
+        )
+
+        world.lightWorld:setBufferWindow(tw * _Constants.Tilesize, 
+                                        (th * _Constants.Tilesize))
+
+        world.lightWorld:centerBufferWindow()
 
         return function()
             
@@ -340,7 +339,7 @@ game.constructors = {
         _Game.remainingRotations = 100
         _Game.remainingBlocks = 4
 
-        globalEventHandler:newEvent("rotate", function(dir) return dir end)
+        _EventManager:newEvent("rotate", function(dir) return dir end)
 
 
         local floor = game.entities:tiledImage(0, 0, _Textures.floorTile, _Textures.floorNormal, nil, tw, th)
@@ -370,15 +369,21 @@ game.constructors = {
         local h = 0
         local r, g, b = 0.9, 0.4, 0
 
-        world.lightWorld:setBufferWindow(tw * _Constants.Tilesize * world.lightWorld.scale.x, 
-                                        ((th) * _Constants.Tilesize * world.lightWorld.scale.y))
-
         _Interface:newEventInterface("mousepressed", 3, 2, function() 
             local px, py = world:convertScreenCoord(love.mouse.getPosition())
             world.lightWorld:addLight(_Lighting.Light(px, py, 100, {r, g, b}))
         end)
 
-        _World.lightWorld:center()
+        -- translation
+        world:setScale(
+            _Screen.smallScreenSize.y / (th * _Constants.Tilesize),
+            _Screen.smallScreenSize.y / (th * _Constants.Tilesize)
+        )
+
+        world.lightWorld:setBufferWindow(tw * _Constants.Tilesize, 
+                                        (th * _Constants.Tilesize))
+
+        world.lightWorld:centerBufferWindow()
 
         return function()
             h = h + 0.5

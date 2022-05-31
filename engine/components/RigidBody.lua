@@ -47,9 +47,9 @@ function comp:moveAndSlide(body, realOffset)
 
         -- static collision event
         if not self.parent.Body.properties.static and obj.Body.properties.static and collision then
-            globalEventHandler:push("staticCollision", self.parent.id, obj.id, dir)
+            _EventManager:push("staticCollision", self.parent.id, obj.id, dir)
         elseif collision then
-            globalEventHandler:push("collision", self.parent.id, obj.id, dir)
+            _EventManager:push("collision", self.parent.id, obj.id, dir)
         end
 
         -- normal collision event

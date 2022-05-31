@@ -34,7 +34,6 @@ _LIGHTINGPATH       = _LIGHTINGPATH or _PACKAGE .. "lighting"
 
 _Constants = {
     Friction = 0.5,
-    Gravity = 100,
     Tilesize = 16
 }
 
@@ -45,15 +44,6 @@ _Game, _Shaders, _Assets, _Util, _Components, _Internal = {}, {}, {}, {}, {}, {}
 importDir {path = _UTILITYPATH, sub = ".lua", global = true, insertion = "_Util"}
 importDir {path = _COMPONENTPATH, sub = ".lua", global = true, insertion = "_Components"}
 importDir {path = _INTERNALPATH, sub = ".lua", ignore = true, insertion = nil}
-
-_Screen = {
-    love.graphics.getWidth(),
-    love.graphics.getHeight(),
-    aspectRatio = Vector(1, 1),
-    smallScreenSize = Vector(love.graphics.getWidth(), love.graphics.getHeight()),
-    fullScreenSize = Vector(),
-    isfullscreen = false,
-}
 
 
 -- import assets
@@ -69,23 +59,60 @@ for _, c in pairs(content) do
     if string.match(c, ".frag") then _Shaders[c:gsub(".frag", "")] = love.graphics.newShader("shaders/" .. c) end
 end
 
-function _Screen:fullscreen()
+-- initiate internals
+_EventManager = _Internal.EventManager()
+_Stack = _Internal.Stack()
+_Interface = _UserInterface.Handler()
 
-    love.window.setFullscreen(not self.isfullscreen)
+function love.run()
+	if love.load then love.load(love.arg.parseGameArguments(arg), arg) end
 
-    self.isfullscreen = love.window.getFullscreen()
+    _Stack.onadd()
+    _Rendering.Pipeline:onadd()
+    _Interface:onadd()
+    _EventManager:onadd()
 
-    self[1], self[2] = love.graphics.getWidth(), love.graphics.getHeight()
+	-- We don't want the first frame's dt to include time taken by love.load.
+	if love.timer then love.timer.step() end
 
-    -- size aspect ratio
-    if self.isfullscreen then
-        self.fullScreenSize.x = love.graphics.getWidth()
-        self.fullScreenSize.y = love.graphics.getHeight()
+	local dt = 0
 
-        local aspect = math.min(self.fullScreenSize.x / self.smallScreenSize.x, self.fullScreenSize.y / self.smallScreenSize.y)
+	-- Main loop time.
+	return function()
+		-- Process events.
+		if love.event then
+			love.event.pump()
+			for name, a,b,c,d,e,f in love.event.poll() do
+				if name == "quit" then
+					if not love.quit or not love.quit() then
+						return a or 0
+					end
+				end
+				love.handlers[name](a,b,c,d,e,f)
+			end
+		end
 
-        self.aspectRatio.x, self.aspectRatio.y = aspect, aspect
-    else
-        self.aspectRatio.x, self.aspectRatio.y = 1, 1
-    end
+		-- Update dt, as we'll be passing it to update
+		if love.timer then dt = love.timer.step() end
+
+		-- Call update and draw
+		if love.update then love.update(dt) end -- will pass 0 if love.timer is disabled
+
+        -- update engine internals
+        _Interface:update(dt)
+        _Stack:update(dt)
+        _EventManager:update(dt)
+        _Rendering.Pipeline:update(dt)
+
+		if love.graphics and love.graphics.isActive() then
+			love.graphics.origin()
+			love.graphics.clear(love.graphics.getBackgroundColor())
+
+            _Rendering.Pipeline:draw()
+
+			love.graphics.present()
+		end
+
+		if love.timer then love.timer.sleep(0.001) end
+	end
 end

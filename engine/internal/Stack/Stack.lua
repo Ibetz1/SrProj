@@ -2,10 +2,18 @@ local stack = Object:new()
 
 function stack:init()
     self.scenes = {}
-    self.scene = nil
+end
 
-    self.eventHandler = _Internal.EventHandler()
-    _G.globalEventHandler = self.eventHandler
+-- clears the stack
+function stack:clear()
+    self.scenes = {}
+end
+
+function stack:loadInstance(func)
+    self:clear()
+    _Rendering.Pipeline:clear()
+
+    func()
 end
 
 -- makes a new scene
@@ -20,6 +28,10 @@ end
 function stack:addScene(scene)
     table.insert(self.scenes, scene)
 
+    if scene.draw then
+        _Rendering.Pipeline:addLayer(scene.draw, scene)
+    end
+
     scene:onadd()
 end
 
@@ -27,24 +39,6 @@ end
 function stack:update(dt)
     for _, scene in pairs(self.scenes) do
         if scene.update then scene:update(dt) end
-    end
-
-    self.eventHandler:update()
-end
-
--- draws current scene
-function stack:draw()
-
-    for _, scene in pairs(self.scenes) do
-        love.graphics.push()
-
-            love.graphics.origin()
-
-            love.graphics.scale(_Screen.aspectRatio.x, _Screen.aspectRatio.y) 
-
-            if scene.draw then scene:draw() end
-
-        love.graphics.pop()
     end
 end
 

@@ -1,6 +1,4 @@
-local world = Object:new({
-    resolutionScaling = 1
-})
+local world = Object:new()
 
 function world:init(ambience, d, settings)
     self.ambience = ambience or {1, 1, 1}
@@ -18,10 +16,6 @@ function world:init(ambience, d, settings)
 
     self.glowTick = 0
     self.glowDir = 1
-
-    self.doRenderNormals = true
-    self.doRenderShadows = true
-    self.noLighting = true
 
     -- scaling methods
     self.checkRange = true
@@ -44,7 +38,7 @@ function world:setBuffers(w, h)
     self.normalMap =       love.graphics.newCanvas(bufferWindow[1], bufferWindow[2])
     self.texBuffer =       love.graphics.newCanvas(bufferWindow[1], bufferWindow[2])
     self.drawBuffer =      love.graphics.newCanvas(bufferWindow[1], bufferWindow[2])
-    self.glowBuffer =      love.graphics.newCanvas(bufferWindow[1], bufferWindow[2])
+    self.postBuffer =      love.graphics.newCanvas(bufferWindow[1], bufferWindow[2])
 
     -- resolution scaled buffers
     self.lightingBuffer =  love.graphics.newCanvas(w, h)
@@ -68,8 +62,6 @@ function world:renderLights(dt)
 
             -- render occlusion
             light:updateShadowBuffer(function(ox, oy)
-                if not self.doRenderShadows then return end
-
                 -- draw shadows
                 for l = 1, self.d do
                     for o = 1, #self.bodies[l] do
@@ -160,8 +152,6 @@ function world:renderNormals()
 
         love.graphics.setBlendMode("alpha")
 
-        if not self.doRenderNormals then return end
-
         for l = 1, self.d do
 
             -- render normals
@@ -182,13 +172,13 @@ function world:renderNormals()
 end
 
 -- renders glow map
-function world:renderGlow(dt)
+function world:renderPost(dt)
     self.glowTick = self.glowTick + dt * self.glowDir
     if self.glowTick > 1 or self.glowTick < 0 then self.glowDir = -self.glowDir end
 
     self.glowTick = math.min(math.max(self.glowTick, 0), 1)
 
-    love.graphics.setCanvas(self.glowBuffer)
+    love.graphics.setCanvas(self.postBuffer)
     love.graphics.clear()
     love.graphics.origin()
     love.graphics.translate(self.translation.x, self.translation.y)
@@ -209,12 +199,27 @@ function world:renderGlow(dt)
     love.graphics.setCanvas()
 end
 
+function world:renderBackGround()
+    if not self.backGroundTexture then return end
+        love.graphics.setColor(unpack(self.backGroundColor or self.ambience))
+        
+        love.graphics.push()
+
+            love.graphics.scale(self.scale.x, self.scale.y)
+
+            love.graphics.draw(self.backGroundTexture)
+
+        love.graphics.pop()
+
+        love.graphics.setColor(1, 1, 1, 1)
+end
+
 -- updates world
 function world:update(dt)
     self:renderTextures()
     self:renderLights()
     self:renderNormals()
-    self:renderGlow(dt)
+    self:renderPost(dt)
 
     love.graphics.push()
 
@@ -222,33 +227,24 @@ function world:update(dt)
         love.graphics.origin()
         love.graphics.clear(unpack(self.ambience))
 
-        love.graphics.scale(self.scale.x, self.scale.y)
-
-        if self.noLighting then
-
-            love.graphics.draw(self.texBuffer)
-
-        else
         -- render lighting buffer
-
         love.graphics.setBlendMode("alpha")
 
         love.graphics.setBlendMode("add", "premultiplied")
         
             love.graphics.draw(self.lightingBuffer)
         
+        -- add post processing
+        love.graphics.setBlendMode("add")
+
+            love.graphics.draw(self.postBuffer)
+
         -- render textures
         love.graphics.setBlendMode("multiply", "premultiplied")
 
             love.graphics.draw(self.texBuffer)
-        
-        -- add post processing
-        love.graphics.setBlendMode("add")
-
-            love.graphics.draw(self.glowBuffer)
 
         love.graphics.setBlendMode("alpha")
-        end
 
     love.graphics.setCanvas()
 
@@ -259,30 +255,16 @@ end
 
 -- draws world
 function world:draw()
-
     love.graphics.setBackgroundColor(unpack(self.backGroundColor or self.ambience))
 
     -- draw background
-    if self.backGroundTexture then 
-        love.graphics.setColor(unpack(self.backGroundColor or self.ambience))
-        
-        love.graphics.push()
+    self:renderBackGround()
+    love.graphics.translate(self.offset.x / _Screen.aspectRatio.y, self.offset.y / _Screen.aspectRatio.y)
 
-        love.graphics.scale(self.scale.x, self.scale.y)
-
-        love.graphics.draw(self.backGroundTexture)
-
-        love.graphics.pop()
-
-        love.graphics.setColor(1, 1, 1, 1)
-    end
-
-    love.graphics.translate(self.offset.x / _Screen.aspectRatio.x, 
-                            self.offset.y / _Screen.aspectRatio.y)
+    love.graphics.scale(self.scale.x, self.scale.y)
 
     love.graphics.draw(self.drawBuffer)
 end
-
 
 -- world scale
 function world:setScale(x, y) 
@@ -298,22 +280,26 @@ function world:setTranslation(x, y)
     self.translation.y = y or self.translation.y
 end
 
+-- gets world translation
 function world:getTranslation()
     return self.translation
 end
 
-function world:center()
-    local ox = (love.graphics.getWidth() - (self.drawBuffer:getWidth() * _Screen.aspectRatio.x)) / 2
-    local oy = (love.graphics.getHeight() - (self.drawBuffer:getHeight() * _Screen.aspectRatio.y)) / 2
+-- centers world
+function world:centerBufferWindow()
+    local ox = (love.graphics.getWidth() - self.drawBuffer:getWidth() * (self.scale.x * _Screen.aspectRatio.x)) / 2
+    local oy = (love.graphics.getHeight() - self.drawBuffer:getHeight() * (self.scale.y * _Screen.aspectRatio.y)) / 2
 
     self.offset.x, self.offset.y = ox, oy
 end
 
+-- sets world offset
 function world:setOffset(x, y)
     self.offset.x = x or self.offset.x * self.scale.x
     self.offset.y = y or self.offset.y * self.scale.y
 end
 
+-- gets world offset
 function world:getOffset()
     return self.offset
 end
@@ -326,6 +312,7 @@ function world:addLight(light)
     return #self.lights 
 end
 
+-- remove a light from light world
 function world:removeLight(index) table.remove(self.lights, index) end
 
 -- adds world body

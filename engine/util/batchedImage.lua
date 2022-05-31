@@ -4,6 +4,7 @@ return function(image, tw, th, qw, qh)
 
     local canvas = love.graphics.newCanvas(tw * qw, th * qh)
     love.graphics.setCanvas(canvas)
+    love.graphics.origin()
 
     for x = 0, tw - 1 do
         for y = 0, th - 1 do

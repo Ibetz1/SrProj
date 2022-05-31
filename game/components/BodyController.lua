@@ -53,7 +53,7 @@ function comp:update()
     local body = self.parent.Body
 
     -- rotate
-    local dir = globalEventHandler:poll("rotate", 1)
+    local dir = _EventManager:poll("rotate", 1)
     if dir then self:rotate(dir) end
 
     -- apply controls

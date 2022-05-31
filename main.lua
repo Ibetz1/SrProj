@@ -1,56 +1,60 @@
 require("engine")
 local game = require("game")
 
-local ambience = {0.1, 0.3, 0.2}
+_World = game(16, 16, 2, {0.1, 0.1, 0.1})
 
-_Stack, _World, _Interface = game(16, 16, 2, {0.1, 0.1, 0.1})
-local upd = game.constructors:gameWorld1(_World, 13, 13)
+_Screen.onFullScreen = function()
+    if not _World then return end
+
+    _World:adjustScreenSize()
+    _World.lightWorld:centerBufferWindow()
+end
 
 love.window.setVSync(0)
 
-function love.load()
+local showstats = function()
+    local stats = love.graphics.getStats( )
+
+    love.graphics.print(love.timer.getFPS())
+
+    love.graphics.print(collectgarbage("count"), 0, 12)
+    love.graphics.print(tostring(stats.texturememory), 0, 24)
 end
 
 _Interface:newEventInterface("keypressed", 1, "f11", function() 
     _Screen:fullscreen()
-    _World:adjustScreenSize()
-    _World.lightWorld:center()
-end)
-
-_Interface:newEventInterface("keypressed", 1, "1", function()
-    _World.lightWorld.doRenderShadows = not _World.lightWorld.doRenderShadows
-end)
-
-_Interface:newEventInterface("keypressed", 1, "2", function()
-    _World.lightWorld.doRenderNormals = not _World.lightWorld.doRenderNormals
-end)
-
-_Interface:newEventInterface("keypressed", 1, "3", function()
-    _World.lightWorld.noLighting = not _World.lightWorld.noLighting
 end)
 
 _Interface:newEventInterface("keypressed", 1, "left", function()
     if _Game.remainingRotations > 0 then 
-        globalEventHandler:push("rotate", -1)
+        _EventManager:push("rotate", -1)
         _Game.remainingRotations = _Game.remainingRotations - 1
     end
 end)
 
 _Interface:newEventInterface("keypressed", 1, "right", function() 
     if _Game.remainingRotations > 0 then 
-        globalEventHandler:push("rotate", 1)
+        _EventManager:push("rotate", 1)
         _Game.remainingRotations = _Game.remainingRotations - 1
     end
 end)
 
-function love.update(dt)
-    upd()
+_Interface:newEventInterface("keypressed", 1, "1", function()
+    _Stack:loadInstance(function()
+        _World = game(16, 16, 2, {0.1, 0.1, 0.1})
 
-    _Stack:update(dt)
-end
+        game.constructors:lightDemo(_World, 13, 13)
 
-function love.draw()
-    _Stack:draw()
+        _Rendering.Pipeline:addLayer(showstats)
+    end)
+end)
 
-    love.graphics.print(love.timer.getFPS())
-end
+_Interface:newEventInterface("keypressed", 1, "2", function()
+    _Stack:loadInstance(function()
+        _World = game(16, 16, 2, {0.1, 0.1, 0.1})
+
+        game.constructors:gameWorld1(_World, 13, 13)
+
+        _Rendering.Pipeline:addLayer(showstats)
+    end)
+end)
